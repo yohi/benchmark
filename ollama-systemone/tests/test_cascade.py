@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from systemone_bench.cascade import parse_threshold_grid, pareto_frontier, simulate
+from systemone_bench.cascade import collapse_equivalent, parse_threshold_grid, pareto_frontier, simulate
 
 
 class CascadeTests(unittest.TestCase):
@@ -48,6 +48,39 @@ class CascadeTests(unittest.TestCase):
         self.assertAlmostEqual(result["avg_end_to_end_latency_ms"], 170 / 3)
         self.assertEqual(result["stages"]["fast"]["accepted"], 1)
         self.assertEqual(result["stages"]["strong"]["accepted"], 1)
+
+    def test_collapse_equivalent_groups_threshold_plateaus(self) -> None:
+        rows = [
+            {
+                "thresholds": {"fast": 0.60},
+                "_route_signature": ["fast", "fallback"],
+                "local_coverage": 0.5,
+                "accepted_accuracy": 1.0,
+                "fallback_rate": 0.5,
+                "avg_local_latency_ms": 10.0,
+                "p95_local_latency_ms": 10.0,
+                "local_calls_per_request": 1.0,
+            },
+            {
+                "thresholds": {"fast": 0.70},
+                "_route_signature": ["fast", "fallback"],
+                "local_coverage": 0.5,
+                "accepted_accuracy": 1.0,
+                "fallback_rate": 0.5,
+                "avg_local_latency_ms": 10.0,
+                "p95_local_latency_ms": 10.0,
+                "local_calls_per_request": 1.0,
+            },
+        ]
+        collapsed = collapse_equivalent(rows, ["fast"])
+        self.assertEqual(len(collapsed), 1)
+        self.assertEqual(collapsed[0]["thresholds"]["fast"], 0.70)
+        self.assertEqual(
+            collapsed[0]["threshold_ranges"]["fast"],
+            {"min": 0.60, "max": 0.70},
+        )
+        self.assertEqual(collapsed[0]["equivalent_configurations"], 2)
+        self.assertNotIn("_route_signature", collapsed[0])
 
     def test_pareto_frontier_removes_dominated_configuration(self) -> None:
         rows = [
