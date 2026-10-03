@@ -93,7 +93,6 @@ def main() -> None:
     details: list[dict] = []
     total_requests = len(models) * len(rows) * args.iterations
     completed_requests = 0
-    run_started = time.perf_counter()
     print(
         f"Benchmark: {len(models)} model(s), {len(rows)} case(s), "
         f"{args.iterations} pass(es), {total_requests} measured request(s)",
@@ -124,6 +123,9 @@ def main() -> None:
                     flush=True,
                 )
 
+            model_total_requests = len(rows) * args.iterations
+            model_completed_requests = 0
+            model_started = time.perf_counter()
             print(f"[{model_index}/{len(models)}] {model}: benchmark started", flush=True)
             for pass_no in range(args.iterations):
                 for row in rows:
