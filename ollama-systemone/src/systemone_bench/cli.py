@@ -154,15 +154,19 @@ def main() -> None:
                             "answer": ans,
                         })
                     completed_requests += 1
-                    elapsed_run = time.perf_counter() - run_started
-                    avg_seconds = elapsed_run / completed_requests
-                    remaining = total_requests - completed_requests
-                    eta_seconds = max(0, round(avg_seconds * remaining))
+                    model_completed_requests += 1
+                    model_elapsed = time.perf_counter() - model_started
+                    model_avg_seconds = model_elapsed / model_completed_requests
+                    model_remaining = model_total_requests - model_completed_requests
+                    model_eta_seconds = max(0, round(model_avg_seconds * model_remaining))
                     percent = completed_requests / total_requests * 100 if total_requests else 100.0
+                    model_percent = model_completed_requests / model_total_requests * 100 if model_total_requests else 100.0
                     print(
-                        f"\\r[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
-                        f"{percent:6.2f}% model={model} pass={pass_no + 1}/{args.iterations} "
-                        f"case={row['id']} latency={elapsed_ms:.1f}ms ETA={eta_seconds}s",
+                        f"\r[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
+                        f"{percent:6.2f}% model={model} "
+                        f"[{model_completed_requests}/{model_total_requests} {model_percent:5.1f}%] "
+                        f"pass={pass_no + 1}/{args.iterations} case={row['id']} "
+                        f"latency={elapsed_ms:.1f}ms modelETA={model_eta_seconds}s",
                         end="", file=sys.stderr, flush=True,
                     )
             if total_requests:
