@@ -390,7 +390,7 @@ def main() -> None:
     )
     ap.add_argument(
         "--thresholds",
-        default="0.60:0.95:0.05,0.98,0.99",
+        default="0.40:0.95:0.05,0.98,0.99",
         help="threshold grid shared by all stages; supports start:stop:step syntax",
     )
     ap.add_argument(
