@@ -456,7 +456,6 @@ def main() -> None:
             row["local_calls_per_request"],
         ),
     )
-    frontier = pareto_frontier(collapsed_feasible)
     baselines = best_single_model_baselines(
         by_model,
         keys,
@@ -472,11 +471,15 @@ def main() -> None:
         f"min accepted accuracy={args.min_accepted_accuracy:.4f}"
     )
     print("\nSingle-model baselines:")
+    baseline_rows: list[dict[str, Any]] = []
     for model in models:
         baseline = baselines[model]
         if baseline is None:
             print(f"  {model}: no configuration satisfies the accuracy constraint")
             continue
+        baseline_row = dict(baseline)
+        baseline_row["configuration"] = f"single:{model}"
+        baseline_rows.append(baseline_row)
         threshold_range = baseline["threshold_ranges"][model]
         if threshold_range["min"] == threshold_range["max"]:
             threshold_text = f"{threshold_range['min']:.2f}"
@@ -487,13 +490,32 @@ def main() -> None:
             f"coverage={baseline['local_coverage']:.4f} "
             f"accepted_acc={baseline['accepted_accuracy']:.4f} "
             f"fallback={baseline['fallback_rate']:.4f} "
-            f"avg_local_ms={baseline['avg_local_latency_ms']:.1f}"
+            f"avg_local_ms={baseline['avg_local_latency_ms']:.1f} "
+            f"p95_local_ms={baseline['p95_local_latency_ms']:.1f} "
+            f"local_calls={baseline['local_calls_per_request']:.3f}"
         )
+
+    cascade_rows = []
+    for row in collapsed_feasible:
+        item = dict(row)
+        item["configuration"] = "cascade:" + "->".join(models)
+        cascade_rows.append(item)
+
+    global_frontier = pareto_frontier(cascade_rows + baseline_rows)
 
     print("\nTop configurations by local coverage:")
     print_table(coverage_ranked[: args.top], models)
-    print("\nPareto frontier (coverage vs local latency/calls):")
-    print_table(frontier[: args.top], models)
+    print("\nGlobal Pareto frontier (cascade + single-model baselines):")
+    for index, row in enumerate(global_frontier[: args.top], 1):
+        print(
+            f"{index:>4}  {row['configuration']:<28} "
+            f"coverage={row['local_coverage']:.4f} "
+            f"accepted_acc={row['accepted_accuracy']:.4f} "
+            f"fallback={row['fallback_rate']:.4f} "
+            f"avg_local_ms={row['avg_local_latency_ms']:.1f} "
+            f"p95_local_ms={row['p95_local_latency_ms']:.1f} "
+            f"local_calls={row['local_calls_per_request']:.3f}"
+        )
 
     output = {
         "models": models,
@@ -505,7 +527,7 @@ def main() -> None:
         "fallback_latency_ms": args.fallback_latency_ms,
         "single_model_baselines": baselines,
         "top_by_coverage": coverage_ranked[: args.top],
-        "pareto_frontier": frontier,
+        "global_pareto_frontier": global_frontier,
     }
 
     if args.output:
