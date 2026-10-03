@@ -27,7 +27,11 @@ Clef and Clef Flash require Ollama 0.35.1 or later.
 
 ## Setup
 
+Git operations are run from the repository root. The uv project lives one directory lower under `ollama-systemone/`:
+
 ```bash
+git fetch origin
+git switch feat/systemone-golden-dataset-analysis
 cd ollama-systemone
 uv sync
 
@@ -47,7 +51,7 @@ uv run systemone-bench \
   --iterations 20
 ```
 
-During a run, progress is updated after every measured request with model, pass, case, request latency, percentage, and ETA.
+During a run, progress is updated after every measured request with overall progress, model-local progress, pass, case, request latency, and model-local ETA. Warmup/model-load time is excluded from ETA.
 
 Results are written to `results/<timestamp>-summary.json` and `results/<timestamp>-details.jsonl`.
 
