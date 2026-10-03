@@ -4,7 +4,9 @@ import argparse
 import json
 import math
 import platform
+import shlex
 import statistics
+import subprocess
 import sys
 import time
 from collections import defaultdict
@@ -81,6 +83,23 @@ def main() -> None:
     ap.add_argument("--warmup", type=int, default=2)
     ap.add_argument("--timeout", type=float, default=300)
     ap.add_argument("--keep-alive", default="10m")
+    ap.add_argument(
+        "--cache-reset",
+        choices=("none", "unload", "restart"),
+        default="none",
+        help="reset model/runtime state before each model: unload uses Ollama API; restart runs --restart-command",
+    )
+    ap.add_argument(
+        "--restart-command",
+        default="",
+        help='command used with --cache-reset restart, e.g. "sudo -n systemctl restart ollama"',
+    )
+    ap.add_argument(
+        "--restart-wait",
+        type=float,
+        default=2.0,
+        help="seconds to wait after --restart-command before probing Ollama",
+    )
     ap.add_argument("--thresholds", default="0.90,0.95,0.98,0.99")
     ap.add_argument("--output", type=Path, default=Path("results"))
     args = ap.parse_args()
@@ -99,8 +118,43 @@ def main() -> None:
         flush=True,
     )
 
+    if args.cache_reset == "restart" and not args.restart_command.strip():
+        ap.error("--cache-reset restart requires --restart-command")
+
+    def wait_for_ollama(client: httpx.Client) -> None:
+        deadline = time.monotonic() + args.timeout
+        last_error: Exception | None = None
+        while time.monotonic() < deadline:
+            try:
+                response = client.get(f"{args.base_url.rstrip('/')}/api/tags", timeout=min(5.0, args.timeout))
+                response.raise_for_status()
+                return
+            except (httpx.HTTPError, OSError) as exc:
+                last_error = exc
+                time.sleep(0.25)
+        raise RuntimeError(f"Ollama did not become ready within {args.timeout}s") from last_error
+
     with httpx.Client(timeout=args.timeout) as client:
         for model_index, model in enumerate(models, 1):
+            if args.cache_reset == "unload":
+                print(f"[{model_index}/{len(models)}] {model}: unloading before benchmark...", flush=True)
+                unload = client.post(
+                    f"{args.base_url.rstrip('/')}/api/generate",
+                    json={"model": model, "keep_alive": 0},
+                )
+                unload.raise_for_status()
+            elif args.cache_reset == "restart":
+                command = shlex.split(args.restart_command)
+                print(
+                    f"[{model_index}/{len(models)}] {model}: restarting Ollama with: {args.restart_command}",
+                    flush=True,
+                )
+                subprocess.run(command, check=True)
+                if args.restart_wait > 0:
+                    time.sleep(args.restart_wait)
+                wait_for_ollama(client)
+                print(f"[{model_index}/{len(models)}] {model}: Ollama is ready", flush=True)
+
             # Use a synthetic warmup request so the first measured dataset row cannot
             # benefit from an identical prompt/KV-cache entry.
             warm_payload = {
