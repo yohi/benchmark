@@ -195,7 +195,27 @@ def main() -> None:
             "requests_per_second": round(1000 / statistics.mean(lats), 3),
             "accuracy": round(sum(d["correct"] for d in labeled) / len(labeled), 6) if labeled else None,
             "thresholds": {},
+            "cases": {},
         }
+        case_ids = sorted({d["case_id"] for d in ds})
+        for case_id in case_ids:
+            case_ds = [d for d in ds if d["case_id"] == case_id]
+            case_req_latency = {}
+            for d in case_ds:
+                case_req_latency[d["pass"]] = d["latency_ms"]
+            case_lats = list(case_req_latency.values())
+            case_labeled = [d for d in case_ds if d["correct"] is not None]
+            m["cases"][case_id] = {
+                "requests": len(case_lats),
+                "decisions": len(case_ds),
+                "latency_ms": {
+                    "mean": round(statistics.mean(case_lats), 3),
+                    "p50": round(percentile(case_lats, .50), 3),
+                    "p95": round(percentile(case_lats, .95), 3),
+                },
+                "accuracy": round(sum(d["correct"] for d in case_labeled) / len(case_labeled), 6) if case_labeled else None,
+                "mean_confidence": round(statistics.mean(d["confidence"] for d in case_ds if d["confidence"] is not None), 6) if any(d["confidence"] is not None for d in case_ds) else None,
+            }
         for t in thresholds:
             eligible = [d for d in labeled if d["confidence"] is not None and d["confidence"] >= t]
             m["thresholds"][str(t)] = {
