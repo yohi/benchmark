@@ -27,11 +27,9 @@ Clef and Clef Flash require Ollama 0.35.1 or later.
 
 ## Setup
 
-Git operations are run from the repository root. The uv project lives one directory lower under `ollama-systemone/`:
+The uv project lives under `ollama-systemone/`:
 
 ```bash
-git fetch origin
-git switch feat/systemone-golden-dataset-analysis
 cd ollama-systemone
 uv sync
 
@@ -130,6 +128,53 @@ uv run systemone-bench \\
 ```
 
 The summary includes per-case latency, accuracy, and mean confidence so outlier tasks can be identified without manually processing the detail JSONL. For production routing decisions, replace or supplement this synthetic golden set with representative real tasks.
+
+## Cascade analysis
+
+`systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
+
+For example, if one detail file contains Tev1 and another contains Nimble/Clef Flash:
+
+```bash
+uv run systemone-cascade \
+  --details \
+    results/20261003-140920-details.jsonl \
+    results/20261003-142036-details.jsonl \
+  --models tev1:4b,nimble \
+  --thresholds 0.40:0.95:0.01,0.98,0.99 \
+  --min-accepted-accuracy 1.0 \
+  --output results/tev1-nimble-cascade.json
+```
+
+The analyzer evaluates every threshold combination in the requested grid. It reports:
+
+- local coverage
+- accuracy among locally accepted decisions
+- paid/fallback escalation rate
+- average and p95 local cascade latency
+- local model calls per request
+- acceptance and accuracy at each cascade stage
+- best feasible single-model baselines for each selected model
+- a coverage-ranked shortlist
+- a global Pareto frontier across cascade configurations and single-model baselines, using local coverage, local latency, and model-call count
+- collapsed threshold plateaus when multiple threshold combinations produce exactly the same routing decisions
+
+The detail files must contain the same labeled decision set for every selected model. Duplicate model/case rows are rejected so separate repeated benchmark runs cannot be mixed accidentally.
+
+Latency simulation currently requires one decision/question per benchmark HTTP request. This matches the engineering routing golden dataset. If a future dataset batches multiple questions into one System One request, the analyzer stops rather than double-counting that shared request latency.
+
+To estimate end-to-end latency including a paid fallback, provide its assumed latency:
+
+```bash
+uv run systemone-cascade \
+  --details results/tev-details.jsonl results/nimble-details.jsonl \
+  --models tev1:4b,nimble \
+  --thresholds 0.65:0.90:0.01 \
+  --min-accepted-accuracy 1.0 \
+  --fallback-latency-ms 3000
+```
+
+`accepted_accuracy` only measures decisions accepted by the local cascade. The analyzer does not assume that the paid fallback is correct unless its quality is evaluated separately.
 
 ## Notes
 
