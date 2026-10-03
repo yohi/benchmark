@@ -4,7 +4,9 @@ import argparse
 import json
 import math
 import platform
+import shlex
 import statistics
+import subprocess
 import sys
 import time
 from collections import defaultdict
@@ -81,6 +83,23 @@ def main() -> None:
     ap.add_argument("--warmup", type=int, default=2)
     ap.add_argument("--timeout", type=float, default=300)
     ap.add_argument("--keep-alive", default="10m")
+    ap.add_argument(
+        "--cache-reset",
+        choices=("none", "unload", "restart"),
+        default="none",
+        help="reset model/runtime state before each model: unload uses Ollama API; restart runs --restart-command",
+    )
+    ap.add_argument(
+        "--restart-command",
+        default="",
+        help='command used with --cache-reset restart, e.g. "sudo -n systemctl restart ollama"',
+    )
+    ap.add_argument(
+        "--restart-wait",
+        type=float,
+        default=2.0,
+        help="seconds to wait after --restart-command before probing Ollama",
+    )
     ap.add_argument("--thresholds", default="0.90,0.95,0.98,0.99")
     ap.add_argument("--output", type=Path, default=Path("results"))
     args = ap.parse_args()
@@ -93,17 +112,66 @@ def main() -> None:
     details: list[dict] = []
     total_requests = len(models) * len(rows) * args.iterations
     completed_requests = 0
-    run_started = time.perf_counter()
     print(
         f"Benchmark: {len(models)} model(s), {len(rows)} case(s), "
         f"{args.iterations} pass(es), {total_requests} measured request(s)",
         flush=True,
     )
 
+    if args.cache_reset == "restart" and not args.restart_command.strip():
+        ap.error("--cache-reset restart requires --restart-command")
+
+    def wait_for_ollama(client: httpx.Client) -> None:
+        deadline = time.monotonic() + args.timeout
+        last_error: Exception | None = None
+        while time.monotonic() < deadline:
+            try:
+                response = client.get(f"{args.base_url.rstrip('/')}/api/tags", timeout=min(5.0, args.timeout))
+                response.raise_for_status()
+                return
+            except (httpx.HTTPError, OSError) as exc:
+                last_error = exc
+                time.sleep(0.25)
+        raise RuntimeError(f"Ollama did not become ready within {args.timeout}s") from last_error
+
     with httpx.Client(timeout=args.timeout) as client:
         for model_index, model in enumerate(models, 1):
-            warm = rows[0]
-            warm_payload = {"model": model, "state": warm["state"], "questions": warm["questions"], "keep_alive": args.keep_alive}
+            if args.cache_reset == "unload":
+                print(f"[{model_index}/{len(models)}] {model}: unloading before benchmark...", flush=True)
+                unload = client.post(
+                    f"{args.base_url.rstrip('/')}/api/generate",
+                    json={"model": model, "keep_alive": 0},
+                )
+                unload.raise_for_status()
+            elif args.cache_reset == "restart":
+                command = shlex.split(args.restart_command)
+                print(
+                    f"[{model_index}/{len(models)}] {model}: restarting Ollama with: {args.restart_command}",
+                    flush=True,
+                )
+                subprocess.run(command, check=True)
+                if args.restart_wait > 0:
+                    time.sleep(args.restart_wait)
+                wait_for_ollama(client)
+                print(f"[{model_index}/{len(models)}] {model}: Ollama is ready", flush=True)
+
+            # Use a synthetic warmup request so the first measured dataset row cannot
+            # benefit from an identical prompt/KV-cache entry.
+            warm_payload = {
+                "model": model,
+                "state": {"task": "Warm up the decision model before measurement."},
+                "questions": {
+                    "warmup": {
+                        "type": "choice",
+                        "instructions": "Classify this synthetic warm-up request.",
+                        "criteria": {
+                            "warmup": "A benchmark warm-up request.",
+                            "other": "Any non-warm-up request.",
+                        },
+                    }
+                },
+                "keep_alive": args.keep_alive,
+            }
             if args.warmup:
                 print(
                     f"[{model_index}/{len(models)}] {model}: warming up ({args.warmup} request(s))...",
@@ -124,6 +192,9 @@ def main() -> None:
                     flush=True,
                 )
 
+            model_total_requests = len(rows) * args.iterations
+            model_completed_requests = 0
+            model_started = time.perf_counter()
             print(f"[{model_index}/{len(models)}] {model}: benchmark started", flush=True)
             for pass_no in range(args.iterations):
                 for row in rows:
@@ -152,17 +223,24 @@ def main() -> None:
                             "answer": ans,
                         })
                     completed_requests += 1
-                    elapsed_run = time.perf_counter() - run_started
-                    avg_seconds = elapsed_run / completed_requests
-                    remaining = total_requests - completed_requests
-                    eta_seconds = max(0, round(avg_seconds * remaining))
+                    model_completed_requests += 1
+                    model_elapsed = time.perf_counter() - model_started
+                    model_avg_seconds = model_elapsed / model_completed_requests
+                    model_remaining = model_total_requests - model_completed_requests
+                    model_eta_seconds = max(0, round(model_avg_seconds * model_remaining))
                     percent = completed_requests / total_requests * 100 if total_requests else 100.0
-                    print(
-                        f"\\r[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
-                        f"{percent:6.2f}% model={model} pass={pass_no + 1}/{args.iterations} "
-                        f"case={row['id']} latency={elapsed_ms:.1f}ms ETA={eta_seconds}s",
-                        end="", file=sys.stderr, flush=True,
+                    model_percent = model_completed_requests / model_total_requests * 100 if model_total_requests else 100.0
+                    progress_line = (
+                        f"[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
+                        f"{percent:6.2f}% model={model} "
+                        f"[{model_completed_requests}/{model_total_requests} {model_percent:5.1f}%] "
+                        f"pass={pass_no + 1}/{args.iterations} case={row['id']} "
+                        f"latency={elapsed_ms:.1f}ms modelETA={model_eta_seconds}s"
                     )
+                    if sys.stderr.isatty():
+                        print(f"\r\x1b[2K{progress_line}", end="", file=sys.stderr, flush=True)
+                    else:
+                        print(progress_line, file=sys.stderr, flush=True)
             if total_requests:
                 print(file=sys.stderr, flush=True)
             print(f"[{model_index}/{len(models)}] {model}: complete", flush=True)
@@ -195,7 +273,27 @@ def main() -> None:
             "requests_per_second": round(1000 / statistics.mean(lats), 3),
             "accuracy": round(sum(d["correct"] for d in labeled) / len(labeled), 6) if labeled else None,
             "thresholds": {},
+            "cases": {},
         }
+        case_ids = sorted({d["case_id"] for d in ds})
+        for case_id in case_ids:
+            case_ds = [d for d in ds if d["case_id"] == case_id]
+            case_req_latency = {}
+            for d in case_ds:
+                case_req_latency[d["pass"]] = d["latency_ms"]
+            case_lats = list(case_req_latency.values())
+            case_labeled = [d for d in case_ds if d["correct"] is not None]
+            m["cases"][case_id] = {
+                "requests": len(case_lats),
+                "decisions": len(case_ds),
+                "latency_ms": {
+                    "mean": round(statistics.mean(case_lats), 3),
+                    "p50": round(percentile(case_lats, .50), 3),
+                    "p95": round(percentile(case_lats, .95), 3),
+                },
+                "accuracy": round(sum(d["correct"] for d in case_labeled) / len(case_labeled), 6) if case_labeled else None,
+                "mean_confidence": round(statistics.mean(d["confidence"] for d in case_ds if d["confidence"] is not None), 6) if any(d["confidence"] is not None for d in case_ds) else None,
+            }
         for t in thresholds:
             eligible = [d for d in labeled if d["confidence"] is not None and d["confidence"] >= t]
             m["thresholds"][str(t)] = {
