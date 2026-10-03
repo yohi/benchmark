@@ -166,6 +166,7 @@ def simulate(
     local_calls = 0
     local_latencies: list[float] = []
     end_to_end_latencies: list[float] = []
+    route_signature: list[str] = []
     stages: dict[str, dict[str, int]] = {
         model: {"reached": 0, "accepted": 0, "correct": 0}
         for model in models
@@ -192,8 +193,10 @@ def simulate(
 
         local_latencies.append(local_latency)
         if accepted_here:
+            route_signature.append(model)
             end_to_end_latencies.append(local_latency)
         else:
+            route_signature.append("fallback")
             fallback_count += 1
             if fallback_latency_ms is not None:
                 end_to_end_latencies.append(local_latency + fallback_latency_ms)
@@ -229,6 +232,7 @@ def simulate(
         "fallback_calls_per_request": fallback_count / total if total else 0.0,
         "total_calls_per_request": (local_calls + fallback_count) / total if total else 0.0,
         "stages": stage_summary,
+        "_route_signature": route_signature,
     }
     if fallback_latency_ms is not None:
         result.update(
@@ -271,6 +275,69 @@ def pareto_frontier(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     )
 
 
+def collapse_equivalent(
+    rows: list[dict[str, Any]],
+    models: list[str],
+) -> list[dict[str, Any]]:
+    groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
+    for row in rows:
+        signature = tuple(row["_route_signature"])
+        groups.setdefault(signature, []).append(row)
+
+    collapsed: list[dict[str, Any]] = []
+    for group in groups.values():
+        # Prefer the highest thresholds as the representative of an identical
+        # routing plateau while preserving the full equivalent range.
+        representative = max(
+            group,
+            key=lambda row: tuple(row["thresholds"][model] for model in models),
+        )
+        item = {key: value for key, value in representative.items() if key != "_route_signature"}
+        item["threshold_ranges"] = {
+            model: {
+                "min": min(row["thresholds"][model] for row in group),
+                "max": max(row["thresholds"][model] for row in group),
+            }
+            for model in models
+        }
+        item["equivalent_configurations"] = len(group)
+        collapsed.append(item)
+    return collapsed
+
+
+def best_single_model_baselines(
+    by_model: dict[str, dict[DecisionKey, dict[str, Any]]],
+    keys: list[DecisionKey],
+    models: list[str],
+    grid: list[float],
+    min_accepted_accuracy: float,
+    fallback_latency_ms: float | None,
+) -> dict[str, dict[str, Any] | None]:
+    baselines: dict[str, dict[str, Any] | None] = {}
+    for model in models:
+        rows = [
+            simulate(by_model, keys, [model], (threshold,), fallback_latency_ms)
+            for threshold in grid
+        ]
+        feasible = [
+            row
+            for row in rows
+            if row["accepted_accuracy"] is not None
+            and row["accepted_accuracy"] >= min_accepted_accuracy
+        ]
+        collapsed = collapse_equivalent(feasible, [model])
+        ranked = sorted(
+            collapsed,
+            key=lambda row: (
+                -row["local_coverage"],
+                row["avg_local_latency_ms"],
+                row["local_calls_per_request"],
+            ),
+        )
+        baselines[model] = ranked[0] if ranked else None
+    return baselines
+
+
 def print_table(rows: list[dict[str, Any]], models: list[str]) -> None:
     if not rows:
         print("No configurations satisfy the requested accepted-accuracy constraint.")
@@ -282,9 +349,17 @@ def print_table(rows: list[dict[str, Any]], models: list[str]) -> None:
     )
     print(header)
     for index, row in enumerate(rows, 1):
-        threshold_text = ",".join(
-            f"{model}={row['thresholds'][model]:.2f}" for model in models
-        )
+        ranges = row.get("threshold_ranges", {})
+        threshold_parts = []
+        for model in models:
+            threshold_range = ranges.get(model)
+            if threshold_range and threshold_range["min"] != threshold_range["max"]:
+                threshold_parts.append(
+                    f"{model}={threshold_range['min']:.2f}..{threshold_range['max']:.2f}"
+                )
+            else:
+                threshold_parts.append(f"{model}={row['thresholds'][model]:.2f}")
+        threshold_text = ",".join(threshold_parts)
         accuracy = row["accepted_accuracy"]
         accuracy_text = "n/a" if accuracy is None else f"{accuracy:.4f}"
         print(
@@ -372,21 +447,49 @@ def main() -> None:
         if row["accepted_accuracy"] is not None
         and row["accepted_accuracy"] >= args.min_accepted_accuracy
     ]
+    collapsed_feasible = collapse_equivalent(feasible, models)
     coverage_ranked = sorted(
-        feasible,
+        collapsed_feasible,
         key=lambda row: (
             -row["local_coverage"],
             row["avg_local_latency_ms"],
             row["local_calls_per_request"],
         ),
     )
-    frontier = pareto_frontier(feasible)
+    frontier = pareto_frontier(collapsed_feasible)
+    baselines = best_single_model_baselines(
+        by_model,
+        keys,
+        models,
+        grid,
+        args.min_accepted_accuracy,
+        args.fallback_latency_ms,
+    )
 
     print(
         f"Cascade: {' -> '.join(models)} | decisions={len(keys)} | "
         f"grid={len(grid)} threshold(s)/stage | combinations={len(all_results)} | "
         f"min accepted accuracy={args.min_accepted_accuracy:.4f}"
     )
+    print("\nSingle-model baselines:")
+    for model in models:
+        baseline = baselines[model]
+        if baseline is None:
+            print(f"  {model}: no configuration satisfies the accuracy constraint")
+            continue
+        threshold_range = baseline["threshold_ranges"][model]
+        if threshold_range["min"] == threshold_range["max"]:
+            threshold_text = f"{threshold_range['min']:.2f}"
+        else:
+            threshold_text = f"{threshold_range['min']:.2f}..{threshold_range['max']:.2f}"
+        print(
+            f"  {model}: threshold={threshold_text} "
+            f"coverage={baseline['local_coverage']:.4f} "
+            f"accepted_acc={baseline['accepted_accuracy']:.4f} "
+            f"fallback={baseline['fallback_rate']:.4f} "
+            f"avg_local_ms={baseline['avg_local_latency_ms']:.1f}"
+        )
+
     print("\nTop configurations by local coverage:")
     print_table(coverage_ranked[: args.top], models)
     print("\nPareto frontier (coverage vs local latency/calls):")
@@ -400,6 +503,7 @@ def main() -> None:
         "combinations_evaluated": len(all_results),
         "min_accepted_accuracy": args.min_accepted_accuracy,
         "fallback_latency_ms": args.fallback_latency_ms,
+        "single_model_baselines": baselines,
         "top_by_coverage": coverage_ranked[: args.top],
         "pareto_frontier": frontier,
     }
