@@ -29,9 +29,7 @@ Clef and Clef Flash require Ollama 0.35.1 or later.
 
 ```bash
 cd ollama-systemone
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+uv sync
 
 ollama pull clef-flash
 ollama pull clef
@@ -42,12 +40,14 @@ ollama pull tev1:4b
 ## Quick start
 
 ```bash
-systemone-bench \
+uv run systemone-bench \
   --models clef-flash,clef,nimble,tev1:4b \
   --dataset datasets/smoke.jsonl \
   --warmup 3 \
   --iterations 20
 ```
+
+During a run, progress is updated after every measured request with model, pass, case, request latency, percentage, and ETA.
 
 Results are written to `results/<timestamp>-summary.json` and `results/<timestamp>-details.jsonl`.
 
