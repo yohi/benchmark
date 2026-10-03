@@ -141,7 +141,7 @@ uv run systemone-cascade \
     results/20261003-140920-details.jsonl \
     results/20261003-142036-details.jsonl \
   --models tev1:4b,nimble \
-  --thresholds 0.60:0.95:0.01,0.98,0.99 \
+  --thresholds 0.40:0.95:0.01,0.98,0.99 \
   --min-accepted-accuracy 1.0 \
   --output results/tev1-nimble-cascade.json
 ```
