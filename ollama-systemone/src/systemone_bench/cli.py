@@ -101,8 +101,23 @@ def main() -> None:
 
     with httpx.Client(timeout=args.timeout) as client:
         for model_index, model in enumerate(models, 1):
-            warm = rows[0]
-            warm_payload = {"model": model, "state": warm["state"], "questions": warm["questions"], "keep_alive": args.keep_alive}
+            # Use a synthetic warmup request so the first measured dataset row cannot
+            # benefit from an identical prompt/KV-cache entry.
+            warm_payload = {
+                "model": model,
+                "state": {"task": "Warm up the decision model before measurement."},
+                "questions": {
+                    "warmup": {
+                        "type": "choice",
+                        "instructions": "Classify this synthetic warm-up request.",
+                        "criteria": {
+                            "warmup": "A benchmark warm-up request.",
+                            "other": "Any non-warm-up request.",
+                        },
+                    }
+                },
+                "keep_alive": args.keep_alive,
+            }
             if args.warmup:
                 print(
                     f"[{model_index}/{len(models)}] {model}: warming up ({args.warmup} request(s))...",
@@ -161,14 +176,17 @@ def main() -> None:
                     model_eta_seconds = max(0, round(model_avg_seconds * model_remaining))
                     percent = completed_requests / total_requests * 100 if total_requests else 100.0
                     model_percent = model_completed_requests / model_total_requests * 100 if model_total_requests else 100.0
-                    print(
-                        f"\r[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
+                    progress_line = (
+                        f"[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
                         f"{percent:6.2f}% model={model} "
                         f"[{model_completed_requests}/{model_total_requests} {model_percent:5.1f}%] "
                         f"pass={pass_no + 1}/{args.iterations} case={row['id']} "
-                        f"latency={elapsed_ms:.1f}ms modelETA={model_eta_seconds}s",
-                        end="", file=sys.stderr, flush=True,
+                        f"latency={elapsed_ms:.1f}ms modelETA={model_eta_seconds}s"
                     )
+                    if sys.stderr.isatty():
+                        print(f"\r\x1b[2K{progress_line}", end="", file=sys.stderr, flush=True)
+                    else:
+                        print(progress_line, file=sys.stderr, flush=True)
             if total_requests:
                 print(file=sys.stderr, flush=True)
             print(f"[{model_index}/{len(models)}] {model}: complete", flush=True)
