@@ -154,8 +154,10 @@ The analyzer evaluates every threshold combination in the requested grid. It rep
 - average and p95 local cascade latency
 - local model calls per request
 - acceptance and accuracy at each cascade stage
+- best feasible single-model baselines for each selected model
 - a coverage-ranked shortlist
 - a Pareto frontier across local coverage, local latency, and model-call count
+- collapsed threshold plateaus when multiple threshold combinations produce exactly the same routing decisions
 
 The detail files must contain the same labeled decision set for every selected model. Duplicate model/case rows are rejected so separate repeated benchmark runs cannot be mixed accidentally.
 
