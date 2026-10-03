@@ -111,6 +111,22 @@ Do not treat System One `confidence` as a calibrated probability of correctness.
 
 The included smoke dataset only validates the harness. It is not a meaningful model-quality benchmark.
 
+### Engineering routing golden dataset
+
+`datasets/engineering-routing-golden.jsonl` contains 50 labeled engineering tasks across seven routing classes: implementation, review, research, debug, planning, documentation, and deterministic work. It is intended as a first repeatable quality comparison dataset, not as a substitute for production-derived examples.
+
+Run quality comparison with a single pass first because CPU-only decision models can be slow:
+
+```bash
+uv run systemone-bench \\
+  --models clef-flash,nimble,tev1:4b \\
+  --dataset datasets/engineering-routing-golden.jsonl \\
+  --warmup 1 \\
+  --iterations 1
+```
+
+The summary includes per-case latency, accuracy, and mean confidence so outlier tasks can be identified without manually processing the detail JSONL. For production routing decisions, replace or supplement this synthetic golden set with representative real tasks.
+
 ## Notes
 
 A single System One request may contain multiple questions. Latency statistics are therefore calculated per HTTP request, while accuracy and confidence statistics are calculated per decision/question.
