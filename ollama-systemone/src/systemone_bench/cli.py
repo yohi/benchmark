@@ -5,6 +5,7 @@ import json
 import math
 import platform
 import statistics
+import sys
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -90,15 +91,40 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     run_id = time.strftime("%Y%m%d-%H%M%S")
     details: list[dict] = []
+    total_requests = len(models) * len(rows) * args.iterations
+    completed_requests = 0
+    run_started = time.perf_counter()
+    print(
+        f"Benchmark: {len(models)} model(s), {len(rows)} case(s), "
+        f"{args.iterations} pass(es), {total_requests} measured request(s)",
+        flush=True,
+    )
 
     with httpx.Client(timeout=args.timeout) as client:
-        for model in models:
+        for model_index, model in enumerate(models, 1):
             warm = rows[0]
             warm_payload = {"model": model, "state": warm["state"], "questions": warm["questions"], "keep_alive": args.keep_alive}
-            for _ in range(args.warmup):
+            if args.warmup:
+                print(
+                    f"[{model_index}/{len(models)}] {model}: warming up ({args.warmup} request(s))...",
+                    flush=True,
+                )
+            for warmup_no in range(1, args.warmup + 1):
+                warmup_started = time.perf_counter()
+                print(
+                    f"[{model_index}/{len(models)}] {model}: warmup {warmup_no}/{args.warmup} started...",
+                    flush=True,
+                )
                 r = client.post(f"{args.base_url.rstrip('/')}/v1/systemone", json=warm_payload)
+                warmup_elapsed = time.perf_counter() - warmup_started
                 r.raise_for_status()
+                print(
+                    f"[{model_index}/{len(models)}] {model}: warmup {warmup_no}/{args.warmup} "
+                    f"complete ({warmup_elapsed:.1f}s)",
+                    flush=True,
+                )
 
+            print(f"[{model_index}/{len(models)}] {model}: benchmark started", flush=True)
             for pass_no in range(args.iterations):
                 for row in rows:
                     payload = {"model": model, "state": row["state"], "questions": row["questions"], "keep_alive": args.keep_alive}
@@ -125,6 +151,21 @@ def main() -> None:
                             "cpu_percent_after": cpu_after, "memory_delta_mb": (mem_after - mem_before) / 1024 / 1024,
                             "answer": ans,
                         })
+                    completed_requests += 1
+                    elapsed_run = time.perf_counter() - run_started
+                    avg_seconds = elapsed_run / completed_requests
+                    remaining = total_requests - completed_requests
+                    eta_seconds = max(0, round(avg_seconds * remaining))
+                    percent = completed_requests / total_requests * 100 if total_requests else 100.0
+                    print(
+                        f"\\r[{completed_requests:>{len(str(total_requests))}}/{total_requests}] "
+                        f"{percent:6.2f}% model={model} pass={pass_no + 1}/{args.iterations} "
+                        f"case={row['id']} latency={elapsed_ms:.1f}ms ETA={eta_seconds}s",
+                        end="", file=sys.stderr, flush=True,
+                    )
+            if total_requests:
+                print(file=sys.stderr, flush=True)
+            print(f"[{model_index}/{len(models)}] {model}: complete", flush=True)
 
     detail_path = args.output / f"{run_id}-details.jsonl"
     with detail_path.open("w", encoding="utf-8") as f:
