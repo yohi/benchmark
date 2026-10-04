@@ -104,9 +104,14 @@ For example, a warmup-like first bucket can be caused by:
 - prompt-shape differences in early dataset rows
 - other host/runtime effects
 
-The current heuristic marks the first position bucket as `warmup-like` when its median is at least 25% slower than the median of later bucket medians.
+The analyzer uses two related diagnostics:
 
-That flag is a triage signal only.
+- `prefix_concentrated_tail`: true when a configured early prefix of at least 5 requests has mean latency at least 25% above the remainder **and** no late-tail events occur after the configured late-start position.
+- `first_bucket_median_warmup_like`: a secondary coarse flag when the first position-bucket median is at least 25% slower than the median of later bucket medians.
+
+The prefix diagnostic exists because a small number of very slow startup requests can inflate p99 and prefix mean while leaving a much wider bucket median nearly unchanged.
+
+Both flags are triage signals only.
 
 If the tail is strongly prefix-concentrated, the next experiment should change benchmark warmup strategy or run a repeated identical workload to determine whether the effect is runtime stabilization rather than task semantics.
 
