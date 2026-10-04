@@ -102,9 +102,14 @@ uv run systemone-latency-tail \
 - Dataset序盤だけ異なるPrompt Shape
 - その他Host / Runtime Effect
 
-Current HeuristicではFirst Position Bucket MedianがLater Bucket Medianの中央値より25%以上遅い場合に `warmup-like` とする。
+Analyzerでは2つのDiagnosticを使う。
 
-これはTriage SignalであってCausal Proofではない。
+- `prefix_concentrated_tail`: 5件以上かつLate-startより前のConfigured PrefixでMean LatencyがRemainderより25%以上遅く、かつLate-start以降のLate-tail Eventが0件ならtrue
+- `first_bucket_median_warmup_like`: First Position Bucket MedianがLater Bucket Medianの中央値より25%以上遅い場合のSecondary Coarse Flag
+
+少数の非常に遅いStartup Requestだけでp99 / Prefix Meanが上がり、広いBucket Medianはほぼ変わらないケースを取りこぼさないためPrefix Diagnosticを主に使う。
+
+どちらもTriage SignalでありCausal Proofではない。
 
 Tailが強くPrefixへ集中しているなら、次はWarmup Strategyを変えるか、同一Workload RepeatでRuntime StabilizationかTask Semanticsかを切り分ける。
 
