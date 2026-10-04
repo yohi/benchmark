@@ -1,0 +1,75 @@
+{
+  "tests": {
+    "passed": 42,
+    "failed": 0
+  },
+  "benchmark": {
+    "decisions": 350,
+    "raw_accuracy": 1,
+    "latency_ms": {
+      "mean": 15730.895,
+      "p50": 15222.748,
+      "p90": 15739.622,
+      "p95": 16637.443,
+      "p99": 31875.691
+    },
+    "threshold_0_80": {
+      "coverage": 0.997143,
+      "accepted": 349,
+      "accepted_accuracy": 1,
+      "accepted_errors": 0,
+      "escalation_rate": 0.002857
+    }
+  },
+  "risk_control": {
+    "decisions": 350,
+    "candidates": 1,
+    "family_alpha": 0.05,
+    "pointwise_alpha": 0.05,
+    "zero_error_sample_requirement": 299,
+    "selected_threshold": 0.8,
+    "coverage": 0.9971,
+    "accepted": 349,
+    "errors": 0,
+    "empirical_risk": 0,
+    "upper_risk_bound": 0.0085,
+    "max_risk_target": 0.01,
+    "confidence_level": 0.95,
+    "verdict": "PASS"
+  },
+  "class_results": {
+    "debug": {
+      "raw_accuracy": 1,
+      "accepted": 50
+    },
+    "deterministic": {
+      "raw_accuracy": 1,
+      "accepted": 49
+    },
+    "documentation": {
+      "raw_accuracy": 1,
+      "accepted": 50
+    },
+    "implementation": {
+      "raw_accuracy": 1,
+      "accepted": 50
+    },
+    "planning": {
+      "raw_accuracy": 1,
+      "accepted": 50
+    },
+    "research": {
+      "raw_accuracy": 1,
+      "accepted": 50
+    },
+    "review": {
+      "raw_accuracy": 1,
+      "accepted": 50
+    }
+  },
+  "only_fallback": {
+    "case_id": "risk-fresh-112-deterministic",
+    "correct": true,
+    "confidence": 0.734555
+  }
+}
