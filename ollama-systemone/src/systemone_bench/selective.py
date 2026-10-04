@@ -277,12 +277,26 @@ def analyze_file(
     overall = summarize_subset(rows, bins)
 
     by_predicted: dict[str, Any] = {}
-    labels = sorted({str(row["prediction"]) for row in rows})
-    for label in labels:
+    predicted_labels = sorted({str(row["prediction"]) for row in rows})
+    for label in predicted_labels:
         subset = [
             row for row in rows if str(row["prediction"]) == label
         ]
         by_predicted[label] = summarize_subset(subset, bins)
+
+    by_expected: dict[str, Any] = {}
+    expected_labels = sorted(
+        {
+            str(row["expected"])
+            for row in rows
+            if row.get("expected") is not None
+        }
+    )
+    for label in expected_labels:
+        subset = [
+            row for row in rows if str(row.get("expected")) == label
+        ]
+        by_expected[label] = summarize_subset(subset, bins)
 
     errors = [
         {
@@ -303,6 +317,7 @@ def analyze_file(
         "model": model,
         "overall": overall,
         "by_predicted": by_predicted,
+        "by_expected": by_expected,
         "errors": errors,
     }
 
