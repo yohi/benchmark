@@ -290,6 +290,55 @@ uv run systemone-cascade \
 
 `accepted_accuracy` only measures decisions accepted by the local cascade. The analyzer does not assume that the paid fallback is correct unless its quality is evaluated separately.
 
+## Predicted-label threshold policy analysis
+
+`systemone-policy` reuses an existing benchmark detail JSONL and explores confidence thresholds keyed by the model's **predicted label**. It does not rerun Ollama.
+
+This is useful when one global threshold is too coarse. For example, a production-derived evaluation may show that predictions of `planning` need a stricter acceptance threshold while other labels remain safe at the existing default.
+
+The policy never uses the expected label at routing time. The expected/correct fields are used only to score an offline candidate policy.
+
+Evaluate the existing global policy and explore a `planning` override:
+
+```bash
+uv run systemone-policy \
+  --details results/20261005-042132-details.jsonl \
+  --model nimble \
+  --default-threshold 0.60 \
+  --label-grid planning=0.60:0.90:0.01 \
+  --min-accepted-accuracy 1.0 \
+  --output results/20261005-042132-planning-policy.json
+```
+
+The analyzer reports:
+
+- the baseline global-threshold policy
+- every feasible predicted-label policy satisfying `--min-accepted-accuracy`
+- local coverage and fallback rate
+- accepted errors
+- per-predicted-label acceptance/accuracy
+- equivalent threshold plateaus that produce exactly the same accept/fallback decisions
+
+Multiple labels can be explored by repeating `--label-grid`:
+
+```bash
+uv run systemone-policy \
+  --details results/20261005-042132-details.jsonl \
+  --model nimble \
+  --default-threshold 0.60 \
+  --label-grid planning=0.60:0.90:0.01 \
+  --label-grid documentation=0.60:0.90:0.01 \
+  --min-accepted-accuracy 1.0
+```
+
+The search is a Cartesian product across the supplied label grids and is bounded by `--max-combinations`.
+
+### Methodology warning
+
+Use this analyzer for **policy development**, not for silently converting the same evaluation set back into a holdout.
+
+If a predicted-label threshold policy is selected using a detail file, that dataset has become development evidence for the revised policy. Validate the selected policy on another fresh dataset before treating it as deployment evidence.
+
 ## Recording benchmark evidence
 
 Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.

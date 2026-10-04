@@ -1,0 +1,54 @@
+{
+  "decisions": 140,
+  "combinations_evaluated": 31,
+  "min_accepted_accuracy": 1,
+  "baseline": {
+    "default_threshold": 0.6,
+    "coverage": 0.971429,
+    "accepted_accuracy": 0.985294,
+    "fallback_rate": 0.028571,
+    "accepted_errors": 2
+  },
+  "best_feasible_plateaus": [
+    {
+      "default_threshold": 0.6,
+      "planning_threshold_range": {
+        "min": 0.75,
+        "max": 0.86
+      },
+      "coverage": 0.9571,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.0429,
+      "accepted_errors": 0
+    },
+    {
+      "default_threshold": 0.6,
+      "planning_threshold_range": {
+        "min": 0.87,
+        "max": 0.89
+      },
+      "coverage": 0.95,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.05,
+      "accepted_errors": 0
+    },
+    {
+      "default_threshold": 0.6,
+      "planning_threshold_range": {
+        "min": 0.9,
+        "max": 0.9
+      },
+      "coverage": 0.9429,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.0571,
+      "accepted_errors": 0
+    }
+  ],
+  "selected_development_candidate": {
+    "default_threshold": 0.6,
+    "planning_threshold": 0.8,
+    "coverage_on_development_set": 0.9571,
+    "accepted_accuracy_on_development_set": 1,
+    "fallback_rate_on_development_set": 0.0429
+  }
+}
