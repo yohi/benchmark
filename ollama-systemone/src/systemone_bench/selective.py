@@ -120,12 +120,9 @@ def maximum_calibration_error(
     return max(gaps) if gaps else math.nan
 
 
-def risk_coverage_curve(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    ranked = sorted(
-        rows,
-        key=lambda row: float(row["confidence"]),
-        reverse=True,
-    )
+def risk_curve_from_ranked(
+    ranked: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     errors = 0
     total = len(ranked)
     curve: list[dict[str, Any]] = []
@@ -144,6 +141,15 @@ def risk_coverage_curve(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return curve
 
 
+def risk_coverage_curve(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ranked = sorted(
+        rows,
+        key=lambda row: float(row["confidence"]),
+        reverse=True,
+    )
+    return risk_curve_from_ranked(ranked)
+
+
 def area_under_risk_coverage(curve: list[dict[str, Any]]) -> float:
     if not curve:
         return math.nan
@@ -156,7 +162,7 @@ def oracle_aurc(rows: list[dict[str, Any]]) -> float:
         key=lambda row: 1 if row["correct"] else 0,
         reverse=True,
     )
-    return area_under_risk_coverage(risk_coverage_curve(oracle))
+    return area_under_risk_coverage(risk_curve_from_ranked(oracle))
 
 
 def risk_at_coverages(
