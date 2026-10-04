@@ -201,6 +201,18 @@ uv run systemone-cascade \
 
 `accepted_accuracy` only measures decisions accepted by the local cascade. The analyzer does not assume that the paid fallback is correct unless its quality is evaluated separately.
 
+## Recording benchmark evidence
+
+Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.
+
+Each durable benchmark record should contain:
+
+- `manifest.json` for exact run conditions and environment
+- `metrics.json` for compact machine-readable comparison data
+- `report.md` for interpretation, decision rationale, caveats, and next validation work
+
+See `benchmarks/README.md` for the recording policy. The first promoted record is `benchmarks/2026-10-04-nimble-validation/`.
+
 ## Notes
 
 A single System One request may contain multiple questions. Latency statistics are therefore calculated per HTTP request, while accuracy and confidence statistics are calculated per decision/question.
