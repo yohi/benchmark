@@ -24,12 +24,25 @@ def binomial_cdf(k: int, n: int, p: float) -> float:
     if p == 1.0:
         return 0.0
 
-    q = 1.0 - p
-    term = q**n
-    total = term
-    for i in range(k):
-        term *= ((n - i) / (i + 1)) * (p / q)
-        total += term
+    log_terms = []
+    log_p = math.log(p)
+    log_q = math.log1p(-p)
+    for i in range(k + 1):
+        log_prob = (
+            math.lgamma(n + 1)
+            - math.lgamma(i + 1)
+            - math.lgamma(n - i + 1)
+            + i * log_p
+            + (n - i) * log_q
+        )
+        log_terms.append(log_prob)
+
+    max_log = max(log_terms)
+    if math.isinf(max_log) and max_log < 0:
+        return 0.0
+    total = math.exp(max_log) * sum(
+        math.exp(value - max_log) for value in log_terms
+    )
     return min(1.0, max(0.0, total))
 
 
@@ -74,6 +87,23 @@ def load_development_rows(
     if not rows:
         raise ValueError("no development rows found")
     return rows
+
+
+def minimum_zero_error_sample_size(
+    max_risk: float,
+    alpha_pointwise: float,
+) -> int | None:
+    if not 0.0 <= max_risk <= 1.0:
+        raise ValueError("max_risk must be between 0 and 1")
+    if not 0.0 < alpha_pointwise < 1.0:
+        raise ValueError("alpha_pointwise must be between 0 and 1")
+    if max_risk == 0.0:
+        return None
+    if max_risk == 1.0:
+        return 1
+    return math.ceil(
+        math.log(alpha_pointwise) / math.log(1.0 - max_risk)
+    )
 
 
 def evaluate_threshold(
@@ -191,6 +221,9 @@ def select_risk_controlled_threshold(
         "pointwise_alpha": alpha_pointwise,
         "correction": "bonferroni",
         "min_coverage": min_coverage,
+        "minimum_zero_error_accepted_for_target": (
+            minimum_zero_error_sample_size(max_risk, alpha_pointwise)
+        ),
         "candidates": candidates,
         "selected": selected,
     }
@@ -279,6 +312,17 @@ def main() -> None:
         f"Family alpha={result['family_alpha']:.6g} "
         f"pointwise alpha={result['pointwise_alpha']:.6g}"
     )
+    minimum_zero_error = result["minimum_zero_error_accepted_for_target"]
+    if minimum_zero_error is None:
+        print(
+            "Zero-error sample requirement: no finite sample can certify "
+            "a true risk bound of exactly 0."
+        )
+    else:
+        print(
+            "Zero-error sample requirement for requested bound: "
+            f"{minimum_zero_error} accepted decision(s)"
+        )
 
     selected = result["selected"]
     if selected is None:
