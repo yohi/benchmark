@@ -6,7 +6,8 @@ Durable benchmark evidence is promoted explicitly into this directory. Each prom
 
 - `manifest.json` — exact command, model, dataset, environment, and source run ID
 - `metrics.json` — compact machine-readable metrics needed for later comparison
-- `report.md` — human-readable interpretation, decision, caveats, and next validation target
+- `report.md` — English human-readable interpretation, decision, caveats, and next validation target
+- `report.ja.md` — Japanese counterpart of the human-readable report
 
 This split keeps transient or exploratory runs out of Git while preserving the evidence behind engineering decisions.
 
