@@ -154,6 +154,44 @@ These fields are useful for detecting a threshold that looks safe globally but f
 
 The validation set is still synthetic. A production decision should ultimately be checked against representative real tasks, and repeatedly tuning against this holdout turns it into another development set.
 
+### Implementation-boundary adversarial set
+
+`datasets/engineering-routing-implementation-boundary.jsonl` contains 125 implementation-adjacent stress cases across five labels:
+
+- implementation
+- debug
+- planning
+- review
+- research
+
+Each class has 25 cases. Non-implementation cases deliberately contain implementation vocabulary such as "implement", "code", "fix", "migration", or named implementation mechanisms while asking for a different primary action. Implementation cases use similar contexts but actually require production-code changes.
+
+This set targets the confusion pattern observed in the 210-case validation run, where the two raw Nimble errors were:
+
+- debug → implementation
+- planning → implementation
+
+Evaluate the current candidate policy **without retuning first**:
+
+```bash
+uv run systemone-bench \
+  --models nimble \
+  --dataset datasets/engineering-routing-implementation-boundary.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --cache-reset unload \
+  --thresholds 0.55,0.60,0.65,0.70
+```
+
+The primary checkpoint is the previously selected candidate threshold `0.60`. Inspect:
+
+- overall accepted accuracy and coverage
+- `by_expected` for class-local failures
+- `confusion_matrix` for implementation-boundary errors
+- confidence of every raw error
+
+If this run causes the threshold or routing policy to change, treat this adversarial set as development evidence from that point onward. Validate the revised policy on another fresh split before calling it validated.
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
