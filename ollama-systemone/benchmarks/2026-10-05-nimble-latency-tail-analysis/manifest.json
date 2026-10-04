@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "analysis": "latency-tail",
+  "recorded_at": "2026-10-05",
+  "model": "nimble",
+  "source_run_id": "20261005-063902",
+  "detail_file": "results/20261005-063902-details.jsonl",
+  "command": "uv run systemone-latency-tail --details results/20261005-063902-details.jsonl --model nimble --prefixes 1,5,10,20,50 --buckets 10 --top 20 --late-start 21 --tail-multiplier 1.5 --output results/20261005-063902-latency-tail.json",
+  "local_output": "results/20261005-063902-latency-tail.json",
+  "test_result": {
+    "passed": 49,
+    "failed": 0
+  },
+  "conclusion": "prefix-concentrated latency tail; no >=1.5x-median late-tail events after request 20",
+  "note": "This is request-order correlation evidence. It does not prove the runtime root cause."
+}

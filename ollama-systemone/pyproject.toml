@@ -11,6 +11,7 @@ systemone-cascade = "systemone_bench.cascade:main"
 systemone-policy = "systemone_bench.policy:main"
 systemone-selective = "systemone_bench.selective:main"
 systemone-risk-control = "systemone_bench.risk_control:main"
+systemone-latency-tail = "systemone_bench.latency_tail:main"
 
 [build-system]
 requires = ["hatchling"]

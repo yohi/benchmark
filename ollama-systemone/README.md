@@ -525,6 +525,43 @@ See:
 - `docs/selective-risk-control.md`
 - `docs/selective-risk-control.ja.md`
 
+## Latency-tail analysis
+
+`systemone-latency-tail` analyzes request-order latency from an existing detail JSONL without rerunning Ollama.
+
+Use it when p99 is much worse than p50/p95 and you need to distinguish an early startup-shaped tail from persistent runtime spikes or task-shape effects.
+
+Example for the validated Nimble run:
+
+```bash
+uv run systemone-latency-tail \
+  --details results/20261005-063902-details.jsonl \
+  --model nimble \
+  --prefixes 1,5,10,20,50 \
+  --buckets 10 \
+  --top 20 \
+  --late-start 21 \
+  --tail-multiplier 1.5 \
+  --output results/20261005-063902-latency-tail.json
+```
+
+The analyzer reports:
+
+- prefix vs remainder latency
+- equal-position buckets
+- top latency outliers
+- expected/source/scenario-family breakdowns
+- late-run tail counts relative to the overall median
+- a `prefix_concentrated_tail` diagnostic based on early-prefix mean inflation plus absence of late-tail events
+- a secondary first-bucket median warmup-like diagnostic
+
+These diagnostics are not causal proof. If the tail is prefix-concentrated, change the benchmark warmup strategy in a separate experiment. If large spikes persist later in the run, collect host/runtime telemetry before changing warmup behavior.
+
+See:
+
+- `docs/latency-tail-analysis.md`
+- `docs/latency-tail-analysis.ja.md`
+
 ## Recording benchmark evidence
 
 Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.

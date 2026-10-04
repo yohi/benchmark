@@ -39,5 +39,6 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 - `2026-10-05-nimble-selective-confidence/` — Nimble 4 Run横断のCalibration / Selective Classification分析。Absolute Confidence Calibrationは弱い一方、Error Ranking Signalは強いことを確認した記録
 - `2026-10-05-nimble-selective-risk-control/` — Exact Binomial Selective Risk Control分析。1%は現在のEvidence量ではcertify不能、1.5% Diagnosticではthreshold 0.80がDevelopment Coverage 88.29%・Accepted Error 0件でfeasibleとなった記録
 - `2026-10-05-nimble-single-policy-risk-fresh/` — 事前固定したNimble threshold 0.80を350件Fresh Holdoutで検証。349/350 Accepted・Accepted Error 0件・95% One-sided Exact Upper Risk Bound 0.85%で1% GateをPASSした記録
+- `2026-10-05-nimble-latency-tail-analysis/` — 31.88s p99のRequest順序分析。First-5 MeanがRemainderの1.907倍、Position 21以降の>=1.5×Median Tail Eventは0件で、TailがPrefixへ強く集中していることを確認した記録
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
