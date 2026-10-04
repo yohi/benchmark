@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "analysis": "predicted-label-threshold-policy",
+  "recorded_at": "2026-10-05",
+  "source_run_id": "20261005-042132",
+  "model": "nimble",
+  "source_details": "results/20261005-042132-details.jsonl",
+  "command": "uv run systemone-policy --details results/20261005-042132-details.jsonl --model nimble --default-threshold 0.60 --label-grid planning=0.60:0.90:0.01 --min-accepted-accuracy 1.0 --output results/20261005-042132-planning-policy.json",
+  "candidate_policy": {
+    "default_threshold": 0.6,
+    "predicted_label_thresholds": {
+      "planning": 0.8
+    }
+  },
+  "note": "The source 140-case production-derived dataset is development evidence for this revised policy. The candidate must be validated on a new fresh set."
+}
