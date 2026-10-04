@@ -19,3 +19,12 @@ Do not promote every exploratory run. Prefer one durable record per meaningful e
 The Markdown report is not a replacement for machine-readable metrics. It records **why the numbers matter** and what decision was made from them.
 
 If a threshold is later changed using evidence from a validation record, do not keep calling that same dataset an untouched holdout. Use a fresh validation split for the revised policy.
+
+## Recorded milestones
+
+- `2026-10-03-tev1-golden/` — Tev1 4B baseline on the 50-case engineering-routing golden set.
+- `2026-10-03-nimble-clef-golden/` — Nimble vs Clef Flash comparison that established Nimble as the stronger local candidate.
+- `2026-10-04-tev1-nimble-cascade/` — offline cascade analysis comparing Tev1 → Nimble against single-model baselines.
+- `2026-10-04-nimble-validation/` — 210-case holdout validation that supported Nimble threshold 0.60 as the next candidate policy.
+
+The first three entries were backfilled after the recording policy was introduced. Their raw `results/` artifacts remain local and gitignored; the committed manifests, metrics, and reports preserve the observed decision-relevant evidence.
