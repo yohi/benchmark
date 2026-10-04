@@ -72,15 +72,15 @@ planning = 0.80
 
 をDeployment Candidateとして扱う根拠はない。
 
-## 固定PolicyのDerived Metrics
+## Fixed-policy CLIによる確認
 
-このHoldoutに対する `systemone-policy` CLIはまだ実行していないが、Benchmark SummaryだけでPass / Failは確定できる。
+Benchmark後に、固定済みPolicyを `systemone-policy` で直接評価した。
 
 Global 0.60では138件をAcceptし、Accepted Errorが1件。
 
 planning-specific 0.80 overrideにより、confidence 0.631908の正しいplanning predictionが追加で1件fallbackする。
 
-したがってFrozen Policyは以下になる。
+Frozen Policy自体のMetricsは以下。
 
 - Local Accepted: 137/140
 - Local Coverage: **97.86%**
@@ -89,7 +89,17 @@ planning-specific 0.80 overrideにより、confidence 0.631908の正しいplanni
 - Fallback: 3/140 = **2.14%**
 - Accepted Error: **1件**
 
-CanonicalなFixed-policy Outputを残すため `systemone-policy` は実行すべきだが、判定自体は変わらない。
+`systemone-policy` は `default=0.60 / planning=0.80` の1 Candidateだけを評価し、以下を返した。
+
+```text
+Policy analysis: model=nimble decisions=140 default=0.60 combinations=1 min accepted accuracy=1.0000
+Baseline: coverage=0.9857 accepted_acc=0.9928 fallback=0.0143 accepted_errors=1
+
+Top feasible policies by local coverage:
+No policy satisfies the requested accepted-accuracy constraint.
+```
+
+Canonical Outputは `results/20261005-052440-fixed-policy.json` に保存された。これによりFAIL判定はCLI上でも確定した。
 
 ## 解釈
 
