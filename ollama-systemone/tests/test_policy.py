@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from systemone_bench.policy import (
     collapse_equivalent_policies,
     explore_policies,
+    load_policy_details,
     parse_label_grid,
     simulate_policy,
 )
@@ -15,6 +19,41 @@ class PredictedLabelPolicyTests(unittest.TestCase):
         label, grid = parse_label_grid("planning=0.60:0.75:0.05,0.90")
         self.assertEqual(label, "planning")
         self.assertEqual(grid, [0.6, 0.65, 0.7, 0.75, 0.9])
+
+
+    def test_policy_loader_allows_multiple_questions_per_request(self) -> None:
+        rows = [
+            {
+                "model": "nimble",
+                "case_id": "case-1",
+                "pass": 1,
+                "question": "route-a",
+                "prediction": "review",
+                "expected": "review",
+                "correct": True,
+                "confidence": 0.9,
+            },
+            {
+                "model": "nimble",
+                "case_id": "case-1",
+                "pass": 1,
+                "question": "route-b",
+                "prediction": "planning",
+                "expected": "planning",
+                "correct": True,
+                "confidence": 0.8,
+            },
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "details.jsonl"
+            path.write_text(
+                "".join(json.dumps(row) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            loaded = load_policy_details([path])
+
+        self.assertEqual(len(loaded["nimble"]), 2)
 
     def test_policy_uses_predicted_label_threshold(self) -> None:
         keys = [
