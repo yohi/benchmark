@@ -7,6 +7,7 @@ from systemone_bench.risk_control import (
     binomial_cdf,
     clopper_pearson_upper,
     evaluate_threshold,
+    minimum_zero_error_sample_size,
     select_risk_controlled_threshold,
 )
 
@@ -35,6 +36,19 @@ class SelectiveRiskControlTests(unittest.TestCase):
         corrected = clopper_pearson_upper(0, 100, 0.05 / 10)
 
         self.assertGreater(corrected, single)
+
+    def test_zero_error_sample_size_requirement(self) -> None:
+        required = minimum_zero_error_sample_size(
+            max_risk=0.01,
+            alpha_pointwise=0.001,
+        )
+        self.assertEqual(required, 688)
+        self.assertIsNone(
+            minimum_zero_error_sample_size(
+                max_risk=0.0,
+                alpha_pointwise=0.001,
+            )
+        )
 
     def test_evaluate_threshold_reports_selective_risk(self) -> None:
         rows = [
@@ -71,7 +85,7 @@ class SelectiveRiskControlTests(unittest.TestCase):
         result = select_risk_controlled_threshold(
             rows,
             thresholds=[0.70, 0.80, 0.90],
-            max_risk=0.10,
+            max_risk=0.05,
             confidence_level=0.95,
             min_coverage=0.5,
         )
