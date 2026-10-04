@@ -552,9 +552,10 @@ The analyzer reports:
 - top latency outliers
 - expected/source/scenario-family breakdowns
 - late-run tail counts relative to the overall median
-- a heuristic `warmup-like` flag for an unusually slow first position bucket
+- a `prefix_concentrated_tail` diagnostic based on early-prefix mean inflation plus absence of late-tail events
+- a secondary first-bucket median warmup-like diagnostic
 
-The `warmup-like` flag is not causal proof. If the tail is prefix-concentrated, change the benchmark warmup strategy in a separate experiment. If large spikes persist later in the run, collect host/runtime telemetry before changing warmup behavior.
+These diagnostics are not causal proof. If the tail is prefix-concentrated, change the benchmark warmup strategy in a separate experiment. If large spikes persist later in the run, collect host/runtime telemetry before changing warmup behavior.
 
 See:
 
