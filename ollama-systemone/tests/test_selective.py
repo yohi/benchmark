@@ -63,6 +63,19 @@ class SelectiveConfidenceTests(unittest.TestCase):
         self.assertGreaterEqual(aurc, oracle)
         self.assertAlmostEqual(aurc, oracle)
 
+    def test_excess_aurc_detects_bad_confidence_ordering(self) -> None:
+        inverted = [
+            {"confidence": 0.95, "correct": False, "prediction": "b"},
+            {"confidence": 0.80, "correct": True, "prediction": "a"},
+            {"confidence": 0.70, "correct": True, "prediction": "a"},
+            {"confidence": 0.40, "correct": False, "prediction": "b"},
+        ]
+
+        aurc = area_under_risk_coverage(risk_coverage_curve(inverted))
+        oracle = oracle_aurc(inverted)
+
+        self.assertGreater(aurc, oracle)
+
     def test_error_detection_auroc_measures_confidence_ranking(self) -> None:
         self.assertEqual(error_detection_auroc(self.rows), 1.0)
 
