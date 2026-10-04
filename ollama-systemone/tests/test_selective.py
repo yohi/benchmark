@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from systemone_bench.selective import (
+    analyze_file,
     area_under_risk_coverage,
     brier_score,
     calibration_bins,
@@ -93,6 +97,59 @@ class SelectiveConfidenceTests(unittest.TestCase):
         self.assertEqual(result["0.50"]["accepted_accuracy"], 1.0)
         self.assertEqual(result["0.50"]["threshold_floor"], 0.80)
         self.assertEqual(result["1.00"]["errors"], 2)
+
+    def test_analyze_file_reports_expected_and_predicted_breakdowns(self) -> None:
+        rows = [
+            {
+                "model": "nimble",
+                "case_id": "case-1",
+                "pass": 1,
+                "question": "route",
+                "prediction": "implementation",
+                "expected": "implementation",
+                "correct": True,
+                "confidence": 0.90,
+            },
+            {
+                "model": "nimble",
+                "case_id": "case-2",
+                "pass": 1,
+                "question": "route",
+                "prediction": "implementation",
+                "expected": "documentation",
+                "correct": False,
+                "confidence": 0.80,
+            },
+            {
+                "model": "other",
+                "case_id": "case-3",
+                "pass": 1,
+                "question": "route",
+                "prediction": "review",
+                "expected": "review",
+                "correct": True,
+                "confidence": 0.99,
+            },
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "details.jsonl"
+            path.write_text(
+                "".join(json.dumps(row) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            result = analyze_file(path, "nimble", bins=5)
+
+        self.assertEqual(result["overall"]["decisions"], 2)
+        self.assertEqual(
+            result["by_predicted"]["implementation"]["error_count"],
+            1,
+        )
+        self.assertEqual(
+            result["by_expected"]["documentation"]["error_count"],
+            1,
+        )
+        self.assertEqual(len(result["errors"]), 1)
 
     def test_summary_exposes_selective_and_calibration_metrics(self) -> None:
         summary = summarize_subset(self.rows, bins=4)
