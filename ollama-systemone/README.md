@@ -385,6 +385,50 @@ Use this analyzer for **policy development**, not for silently converting the sa
 
 If a predicted-label threshold policy is selected using a detail file, that dataset has become development evidence for the revised policy. Validate the selected policy on another fresh dataset before treating it as deployment evidence.
 
+## Selective confidence analysis
+
+`systemone-selective` evaluates whether System One confidence is useful as an **abstention signal** across existing benchmark runs. It reuses detail JSONL files and does not rerun Ollama.
+
+The analyzer deliberately separates two questions:
+
+- **calibration**: does confidence numerically resemble probability of correctness?
+- **selective classification**: even if it is not calibrated, does confidence rank safer decisions above errors?
+
+Reported metrics include:
+
+- mean confidence vs raw accuracy
+- ECE and MCE
+- Brier score
+- AURC and oracle AURC
+- excess AURC
+- error-detection AUROC using `1 - confidence`
+- risk at 50%, 80%, 90%, 95%, and 100% coverage
+- raw error confidences
+- breakdowns by predicted and expected label
+
+Example across the current Nimble evidence chain:
+
+```bash
+uv run systemone-selective \
+  --details \
+    results/20261004-012101-details.jsonl \
+    results/20261005-033733-details.jsonl \
+    results/20261005-042132-details.jsonl \
+    results/20261005-052440-details.jsonl \
+  --model nimble \
+  --bins 10 \
+  --output results/nimble-selective-confidence.json
+```
+
+Each detail file is analyzed independently instead of being pooled, so a tuned development set cannot hide a failure in a fresh holdout.
+
+Do not interpret one ECE/AUROC value as deployment proof when a run contains only a few errors. The purpose is to check whether confidence behavior is stable across independent datasets before adding another routing threshold.
+
+See:
+
+- `docs/selective-confidence-analysis.md`
+- `docs/selective-confidence-analysis.ja.md`
+
 ## Recording benchmark evidence
 
 Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.
