@@ -1,0 +1,21 @@
+# Benchmark records
+
+`results/` is intentionally gitignored and is the workspace for raw benchmark output.
+
+Durable benchmark evidence is promoted explicitly into this directory. Each promoted run should contain:
+
+- `manifest.json` — exact command, model, dataset, environment, and source run ID
+- `metrics.json` — compact machine-readable metrics needed for later comparison
+- `report.md` — human-readable interpretation, decision, caveats, and next validation target
+
+This split keeps transient or exploratory runs out of Git while preserving the evidence behind engineering decisions.
+
+## Recording policy
+
+Promote a run when it materially affects a model, threshold, architecture, or rollout decision.
+
+Do not promote every exploratory run. Prefer one durable record per meaningful experiment or validation milestone.
+
+The Markdown report is not a replacement for machine-readable metrics. It records **why the numbers matter** and what decision was made from them.
+
+If a threshold is later changed using evidence from a validation record, do not keep calling that same dataset an untouched holdout. Use a fresh validation split for the revised policy.

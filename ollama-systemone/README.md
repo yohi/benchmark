@@ -129,6 +129,31 @@ uv run systemone-bench \\
 
 The summary includes per-case latency, accuracy, and mean confidence so outlier tasks can be identified without manually processing the detail JSONL. For production routing decisions, replace or supplement this synthetic golden set with representative real tasks.
 
+### Engineering routing validation dataset
+
+`datasets/engineering-routing-validation.jsonl` is a separate 210-case holdout set: 30 tasks for each of the seven routing classes. Its task texts do not duplicate the 50-case development/golden set.
+
+Use it to challenge a threshold selected on the smaller development set rather than tuning and reporting against the same examples:
+
+```bash
+uv run systemone-bench \
+  --models nimble \
+  --dataset datasets/engineering-routing-validation.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --cache-reset unload \
+  --thresholds 0.40,0.45,0.50,0.55,0.58,0.60,0.65,0.70
+```
+
+The summary now also includes:
+
+- `by_expected`: per-label decision count, raw accuracy, mean confidence, and threshold coverage/accuracy
+- `confusion_matrix`: expected label → predicted-label counts
+
+These fields are useful for detecting a threshold that looks safe globally but fails disproportionately on one routing class.
+
+The validation set is still synthetic. A production decision should ultimately be checked against representative real tasks, and repeatedly tuning against this holdout turns it into another development set.
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
@@ -175,6 +200,18 @@ uv run systemone-cascade \
 ```
 
 `accepted_accuracy` only measures decisions accepted by the local cascade. The analyzer does not assume that the paid fallback is correct unless its quality is evaluated separately.
+
+## Recording benchmark evidence
+
+Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.
+
+Each durable benchmark record should contain:
+
+- `manifest.json` for exact run conditions and environment
+- `metrics.json` for compact machine-readable comparison data
+- `report.md` for interpretation, decision rationale, caveats, and next validation work
+
+See `benchmarks/README.md` for the recording policy. The first promoted record is `benchmarks/2026-10-04-nimble-validation/`.
 
 ## Notes
 

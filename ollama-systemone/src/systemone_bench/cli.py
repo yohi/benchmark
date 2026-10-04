@@ -221,6 +221,7 @@ def main() -> None:
                             "latency_ms": elapsed_ms, "cpu_percent_before": cpu_before,
                             "cpu_percent_after": cpu_after, "memory_delta_mb": (mem_after - mem_before) / 1024 / 1024,
                             "answer": ans,
+                            "metadata": row.get("metadata"),
                         })
                     completed_requests += 1
                     model_completed_requests += 1
@@ -274,6 +275,8 @@ def main() -> None:
             "accuracy": round(sum(d["correct"] for d in labeled) / len(labeled), 6) if labeled else None,
             "thresholds": {},
             "cases": {},
+            "by_expected": {},
+            "confusion_matrix": {},
         }
         case_ids = sorted({d["case_id"] for d in ds})
         for case_id in case_ids:
@@ -302,6 +305,45 @@ def main() -> None:
                 "escalation_rate": round(1 - len(eligible) / len(labeled), 6) if labeled else None,
                 "n": len(eligible),
             }
+
+        expected_values = sorted(
+            {str(d["expected"]) for d in labeled if d["expected"] is not None}
+        )
+        for expected_value in expected_values:
+            expected_ds = [d for d in labeled if str(d["expected"]) == expected_value]
+            confidences = [
+                d["confidence"] for d in expected_ds if d["confidence"] is not None
+            ]
+            label_summary = {
+                "decisions": len(expected_ds),
+                "accuracy": round(
+                    sum(d["correct"] for d in expected_ds) / len(expected_ds), 6
+                ) if expected_ds else None,
+                "mean_confidence": round(statistics.mean(confidences), 6)
+                if confidences else None,
+                "thresholds": {},
+            }
+            for t in thresholds:
+                eligible = [
+                    d for d in expected_ds
+                    if d["confidence"] is not None and d["confidence"] >= t
+                ]
+                label_summary["thresholds"][str(t)] = {
+                    "coverage": round(len(eligible) / len(expected_ds), 6)
+                    if expected_ds else None,
+                    "accuracy": round(
+                        sum(d["correct"] for d in eligible) / len(eligible), 6
+                    ) if eligible else None,
+                    "n": len(eligible),
+                }
+            m["by_expected"][expected_value] = label_summary
+
+            predicted_counts: dict[str, int] = {}
+            for d in expected_ds:
+                predicted_value = str(d["prediction"])
+                predicted_counts[predicted_value] = predicted_counts.get(predicted_value, 0) + 1
+            m["confusion_matrix"][expected_value] = dict(sorted(predicted_counts.items()))
+
         summary["models"][model] = m
 
     summary_path = args.output / f"{run_id}-summary.json"
