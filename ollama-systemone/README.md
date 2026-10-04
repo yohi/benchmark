@@ -429,6 +429,45 @@ See:
 - `docs/selective-confidence-analysis.md`
 - `docs/selective-confidence-analysis.ja.md`
 
+## Selective risk control
+
+`systemone-risk-control` selects a development confidence threshold using a one-sided exact binomial upper bound on accepted error risk rather than by placing a cutoff just above the latest observed error confidence.
+
+For a fixed threshold grid it:
+
+- evaluates accepted errors and coverage
+- computes a one-sided Clopper-Pearson upper risk bound
+- applies Bonferroni correction across the threshold grid
+- selects the maximum-coverage threshold satisfying the requested risk bound
+- reports how many zero-error accepted samples would be required to certify the requested target
+
+Example using the current four Nimble runs as development evidence:
+
+```bash
+uv run systemone-risk-control \
+  --details \
+    results/20261004-012101-details.jsonl \
+    results/20261005-033733-details.jsonl \
+    results/20261005-042132-details.jsonl \
+    results/20261005-052440-details.jsonl \
+  --model nimble \
+  --thresholds 0.50:0.99:0.01 \
+  --max-risk 0.01 \
+  --confidence-level 0.95 \
+  --output results/nimble-risk-control-1pct.json
+```
+
+With a 50-value threshold grid and 95% family-wise confidence, a 1% risk target requires at least 688 accepted decisions with zero observed accepted errors. The current development pool has fewer total decisions than that, so a strict target may be evidence-limited even before model quality is considered.
+
+This method controls a development-sample statistical bound. It is **not** a distribution-shift guarantee and is not a full conformal-risk-control implementation.
+
+Any selected threshold must be frozen before evaluation on another untouched fresh holdout.
+
+See:
+
+- `docs/selective-risk-control.md`
+- `docs/selective-risk-control.ja.md`
+
 ## Recording benchmark evidence
 
 Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.
