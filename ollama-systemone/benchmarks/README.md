@@ -30,5 +30,6 @@ If a threshold is later changed using evidence from a validation record, do not 
 - `2026-10-05-nimble-implementation-boundary/` — 125-case adversarial validation that preserved 100% accepted accuracy at threshold 0.60 and exposed no implementation-attractor errors.
 - `2026-10-05-nimble-policy-fresh-holdout/` — balanced fresh validation that falsified the class-aware `default=0.60 / planning=0.80` candidate with a high-confidence documentation → implementation error.
 - `2026-10-05-nimble-selective-confidence/` — cross-run calibration/selective-classification analysis showing weak absolute confidence calibration but strong error-ranking behavior across four Nimble runs.
+- `2026-10-05-nimble-selective-risk-control/` — exact-binomial selective-risk-control analysis: 1% cannot be certified with the current evidence volume; 1.5% diagnostic selects threshold 0.80 with 88.29% development coverage and zero accepted errors.
 
 The first three entries were backfilled after the recording policy was introduced. Their raw `results/` artifacts remain local and gitignored; the committed manifests, metrics, and reports preserve the observed decision-relevant evidence.
