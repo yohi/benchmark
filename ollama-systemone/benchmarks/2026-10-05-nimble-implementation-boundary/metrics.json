@@ -1,0 +1,110 @@
+{
+  "requests": 125,
+  "decisions": 125,
+  "latency_ms": {
+    "mean": 11805.972,
+    "p50": 10555.971,
+    "p90": 14586.858,
+    "p95": 22983.235,
+    "p99": 23219.178
+  },
+  "requests_per_second": 0.085,
+  "raw_accuracy": 0.984,
+  "thresholds": {
+    "0.55": {
+      "coverage": 0.944,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.056,
+      "n": 118
+    },
+    "0.60": {
+      "coverage": 0.92,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.08,
+      "n": 115
+    },
+    "0.65": {
+      "coverage": 0.896,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.104,
+      "n": 112
+    },
+    "0.70": {
+      "coverage": 0.864,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.136,
+      "n": 108
+    }
+  },
+  "errors": [
+    {
+      "case_id": "boundary-018-debug",
+      "expected": "debug",
+      "prediction": "review",
+      "confidence": 0.541419
+    },
+    {
+      "case_id": "boundary-097-research",
+      "expected": "research",
+      "prediction": "review",
+      "confidence": 0.513124
+    }
+  ],
+  "by_expected": {
+    "debug": {
+      "decisions": 25,
+      "raw_accuracy": 0.96,
+      "mean_confidence": 0.876219,
+      "coverage_at_0_60": 0.92,
+      "accepted_accuracy_at_0_60": 1
+    },
+    "implementation": {
+      "decisions": 25,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.763778,
+      "coverage_at_0_60": 0.88,
+      "accepted_accuracy_at_0_60": 1
+    },
+    "planning": {
+      "decisions": 25,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.939604,
+      "coverage_at_0_60": 1,
+      "accepted_accuracy_at_0_60": 1
+    },
+    "research": {
+      "decisions": 25,
+      "raw_accuracy": 0.96,
+      "mean_confidence": 0.834334,
+      "coverage_at_0_60": 0.8,
+      "accepted_accuracy_at_0_60": 1
+    },
+    "review": {
+      "decisions": 25,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.949876,
+      "coverage_at_0_60": 1,
+      "accepted_accuracy_at_0_60": 1
+    }
+  },
+  "confusion_matrix": {
+    "debug": {
+      "debug": 24,
+      "review": 1
+    },
+    "implementation": {
+      "implementation": 25
+    },
+    "planning": {
+      "planning": 25
+    },
+    "research": {
+      "research": 24,
+      "review": 1
+    },
+    "review": {
+      "review": 25
+    }
+  },
+  "implementation_boundary_errors": 0
+}
