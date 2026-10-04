@@ -1,0 +1,80 @@
+{
+  "requests": 140,
+  "decisions": 140,
+  "latency_ms": {
+    "mean": 14491.615,
+    "p50": 14489.332,
+    "p90": 14656.224,
+    "p95": 14696.919,
+    "p99": 14745.095
+  },
+  "requests_per_second": 0.069,
+  "raw_accuracy": 0.978571,
+  "global_thresholds": {
+    "0.60": {
+      "coverage": 0.985714,
+      "accepted_accuracy": 0.992754,
+      "escalation_rate": 0.014286,
+      "n": 138
+    },
+    "0.80": {
+      "coverage": 0.935714,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.064286,
+      "n": 131
+    }
+  },
+  "raw_errors": [
+    {
+      "case_id": "fresh-037-debug",
+      "expected": "debug",
+      "prediction": "review",
+      "confidence": 0.432299,
+      "accepted_by_frozen_policy": false
+    },
+    {
+      "case_id": "fresh-116-documentation",
+      "expected": "documentation",
+      "prediction": "implementation",
+      "confidence": 0.790712,
+      "accepted_by_frozen_policy": true
+    },
+    {
+      "case_id": "fresh-120-documentation",
+      "expected": "documentation",
+      "prediction": "implementation",
+      "confidence": 0.585526,
+      "accepted_by_frozen_policy": false
+    }
+  ],
+  "frozen_policy": {
+    "default_threshold": 0.6,
+    "predicted_label_thresholds": {
+      "planning": 0.8
+    },
+    "status": "falsified",
+    "reason": "fresh-116-documentation is an incorrect implementation prediction with confidence 0.790712, exceeding the frozen default threshold 0.60"
+  },
+  "derived_fixed_policy_metrics_from_summary": {
+    "local_accepted": 137,
+    "local_coverage": 0.978571,
+    "accepted_correct": 136,
+    "accepted_accuracy": 0.992701,
+    "fallback_count": 3,
+    "fallback_rate": 0.021429,
+    "note": "Derived metrics remain for the exact frozen class-aware policy; the canonical CLI evaluation independently confirmed that the single candidate is infeasible under min accepted accuracy 1.0."
+  },
+  "canonical_fixed_policy_evaluation": {
+    "command": "uv run systemone-policy --details results/20261005-052440-details.jsonl --model nimble --default-threshold 0.60 --label-grid planning=0.80 --min-accepted-accuracy 1.0 --output results/20261005-052440-fixed-policy.json",
+    "combinations_evaluated": 1,
+    "minimum_accepted_accuracy": 1,
+    "baseline": {
+      "coverage": 0.9857,
+      "accepted_accuracy": 0.9928,
+      "fallback_rate": 0.0143,
+      "accepted_errors": 1
+    },
+    "feasible_policy_count": 0,
+    "result": "No policy satisfies the requested accepted-accuracy constraint."
+  }
+}
