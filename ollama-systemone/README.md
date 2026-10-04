@@ -562,6 +562,47 @@ See:
 - `docs/latency-tail-analysis.md`
 - `docs/latency-tail-analysis.ja.md`
 
+## Warmup stabilization study
+
+`systemone-warmup-study` compares the current one-request synthetic warmup against seven representative routing warmups while keeping the measured workload fixed.
+
+Default design:
+
+```text
+profile A: synthetic-1
+  current generic warmup × 1
+
+profile B: representative-7
+  seven-class routing-schema warmups × 7
+
+repeats: 2
+trial order:
+  repeat 1: A → B
+  repeat 2: B → A
+reset:
+  unload model before every trial
+measured workload:
+  identical 35 requests in every trial
+```
+
+Run:
+
+```bash
+uv run systemone-warmup-study \
+  --model nimble \
+  --dataset datasets/latency-warmup-fixed-workload.jsonl \
+  --repeats 2
+```
+
+The 35-case workload is intentionally reused from an already-consumed benchmark dataset and is **latency-only evidence**, not a fresh quality holdout.
+
+Compare first-request, first-5, first-10, first-20, after-20, p50/p95, and prefix-tail behavior. The goal is to test whether representative warmup removes the previously observed startup-shaped latency tail without changing the validated routing policy.
+
+See:
+
+- `docs/warmup-stabilization-study.md`
+- `docs/warmup-stabilization-study.ja.md`
+
 ## Recording benchmark evidence
 
 Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.
