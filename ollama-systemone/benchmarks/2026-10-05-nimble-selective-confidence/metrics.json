@@ -1,0 +1,96 @@
+{
+  "model": "nimble",
+  "bins": 10,
+  "runs": [
+    {
+      "run_id": "20261004-012101",
+      "decisions": 210,
+      "accuracy": 0.9905,
+      "mean_confidence": 0.9054,
+      "signed_gap": -0.0851,
+      "ece": 0.089,
+      "brier_score": 0.0167,
+      "aurc": 0.0001,
+      "excess_aurc": 0,
+      "error_detection_auroc": 0.9952,
+      "error_count": 2,
+      "max_error_confidence": 0.542108,
+      "risk_at_coverage": {
+        "0.50": 0,
+        "0.80": 0,
+        "0.90": 0,
+        "0.95": 0,
+        "1.00": 0.0095
+      }
+    },
+    {
+      "run_id": "20261005-033733",
+      "decisions": 125,
+      "accuracy": 0.984,
+      "mean_confidence": 0.8728,
+      "signed_gap": -0.1112,
+      "ece": 0.1112,
+      "brier_score": 0.0372,
+      "aurc": 0.0007,
+      "excess_aurc": 0.0005,
+      "error_detection_auroc": 0.9675,
+      "error_count": 2,
+      "max_error_confidence": 0.541419,
+      "risk_at_coverage": {
+        "0.50": 0,
+        "0.80": 0,
+        "0.90": 0,
+        "0.95": 0.0084,
+        "1.00": 0.016
+      }
+    },
+    {
+      "run_id": "20261005-042132",
+      "decisions": 140,
+      "accuracy": 0.9786,
+      "mean_confidence": 0.9064,
+      "signed_gap": -0.0722,
+      "ece": 0.0722,
+      "brier_score": 0.0254,
+      "aurc": 0.001,
+      "excess_aurc": 0.0007,
+      "error_detection_auroc": 0.9659,
+      "error_count": 3,
+      "max_error_confidence": 0.740743,
+      "risk_at_coverage": {
+        "0.50": 0,
+        "0.80": 0,
+        "0.90": 0,
+        "0.95": 0.0075,
+        "1.00": 0.0214
+      }
+    },
+    {
+      "run_id": "20261005-052440",
+      "decisions": 140,
+      "accuracy": 0.9786,
+      "mean_confidence": 0.9317,
+      "signed_gap": -0.0469,
+      "ece": 0.0626,
+      "brier_score": 0.0158,
+      "aurc": 0.0006,
+      "excess_aurc": 0.0003,
+      "error_detection_auroc": 0.9878,
+      "error_count": 3,
+      "max_error_confidence": 0.790712,
+      "risk_at_coverage": {
+        "0.50": 0,
+        "0.80": 0,
+        "0.90": 0,
+        "0.95": 0.0075,
+        "1.00": 0.0214
+      }
+    }
+  ],
+  "interpretation": {
+    "calibration": "under-confident across all four runs; confidence should not be read as a literal correctness probability",
+    "ranking": "strong selective ranking across all four runs",
+    "repeated_observation": "top 90% by confidence contains zero errors in all four runs",
+    "decision": "do not add more predicted-label thresholds; evaluate a principled abstention/calibration strategy next"
+  }
+}
