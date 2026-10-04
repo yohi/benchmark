@@ -192,6 +192,57 @@ The primary checkpoint is the previously selected candidate threshold `0.60`. In
 
 If this run causes the threshold or routing policy to change, treat this adversarial set as development evidence from that point onward. Validate the revised policy on another fresh split before calling it validated.
 
+### Production-derived fresh routing dataset
+
+`datasets/engineering-routing-production-derived-fresh.jsonl` contains 140 tasks abstracted from real engineering request patterns rather than generated from the existing benchmark examples.
+
+The set intentionally reflects the actual shape of interactive engineering work:
+
+- Japanese-first requests mixed with English technical terms, logs, commands, and identifiers
+- short requests and constraint-heavy requests
+- requests with attached error/log context
+- multi-intent requests where the primary requested action must be identified
+- current-information research requests
+- repository changes, reviews, planning, documentation, and deterministic operations
+
+Class distribution is intentionally workload-shaped rather than balanced:
+
+| Label | Cases |
+| --- | ---: |
+| implementation | 30 |
+| debug | 25 |
+| review | 20 |
+| research | 20 |
+| planning | 20 |
+| documentation | 15 |
+| deterministic | 10 |
+| **total** | **140** |
+
+The examples are abstracted from real request patterns and remove account identifiers, secrets, and private URLs. Metadata preserves only a coarse `source_family` and `task_shape`; it does not preserve the original conversation source.
+
+This is a fresh evaluation set for the current candidate policy. Evaluate **threshold 0.60 without retuning first**:
+
+```bash
+uv run systemone-bench \
+  --models nimble \
+  --dataset datasets/engineering-routing-production-derived-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --cache-reset unload \
+  --thresholds 0.55,0.60,0.65,0.70
+```
+
+Primary checkpoint:
+
+- model: `nimble`
+- threshold: `0.60`
+- accepted accuracy first
+- local coverage second
+- per-class failures and confusion matrix
+- raw-error confidence values
+
+Do not lower or raise the threshold based on this run and then continue to call this dataset an untouched holdout. If the routing policy changes after inspecting this result, validate the revised policy on another fresh set.
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
