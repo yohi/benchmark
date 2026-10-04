@@ -289,6 +289,63 @@ See:
 - `datasets/engineering-routing-policy-fresh-holdout.md`
 - `datasets/engineering-routing-policy-fresh-holdout.ja.md`
 
+### Single-policy 1% risk fresh holdout
+
+`datasets/engineering-routing-single-policy-risk-fresh.jsonl` is a new untouched validation set for one policy frozen before measurement:
+
+```text
+model = nimble
+threshold = 0.80
+maximum accepted risk = 1%
+confidence level = 95%
+candidate count = 1
+```
+
+The dataset contains 350 balanced cases: 50 for each routing class.
+
+It uses 25 paired engineering scenario families. Each family contributes two variants for every routing label, keeping technical context similar while changing the requested primary action.
+
+The size is deliberate. For one predeclared threshold, a 95% one-sided exact binomial upper bound below 1% requires at least 299 accepted decisions when zero accepted errors are observed. A 350-case holdout can reach that requirement if fresh coverage at threshold 0.80 is at least about 85.4%.
+
+Run the fresh benchmark:
+
+```bash
+uv run systemone-bench \
+  --models nimble \
+  --dataset datasets/engineering-routing-single-policy-risk-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --cache-reset unload \
+  --thresholds 0.80
+```
+
+Then evaluate exactly one predeclared policy:
+
+```bash
+uv run systemone-risk-control \
+  --details results/<RUN_ID>-details.jsonl \
+  --model nimble \
+  --thresholds 0.80 \
+  --max-risk 0.01 \
+  --confidence-level 0.95 \
+  --output results/<RUN_ID>-single-policy-risk.json
+```
+
+Because `--thresholds` contains exactly one value, this validation does not search across threshold candidates.
+
+Primary gate:
+
+```text
+one-sided exact upper accepted-risk bound <= 1%
+```
+
+A zero-error run with fewer than 299 accepted decisions is **inconclusive due to sample size**, not a pass.
+
+See:
+
+- `datasets/engineering-routing-single-policy-risk-fresh.md`
+- `datasets/engineering-routing-single-policy-risk-fresh.ja.md`
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
