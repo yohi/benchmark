@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "analysis": "selective-risk-control",
+  "recorded_at": "2026-10-05",
+  "model": "nimble",
+  "development_detail_files": [
+    "results/20261004-012101-details.jsonl",
+    "results/20261005-033733-details.jsonl",
+    "results/20261005-042132-details.jsonl",
+    "results/20261005-052440-details.jsonl"
+  ],
+  "development_decisions": 615,
+  "threshold_grid": "0.50:0.99:0.01",
+  "threshold_candidates": 50,
+  "family_confidence_level": 0.95,
+  "correction": "bonferroni",
+  "commands": [
+    "uv run systemone-risk-control --details results/20261004-012101-details.jsonl results/20261005-033733-details.jsonl results/20261005-042132-details.jsonl results/20261005-052440-details.jsonl --model nimble --thresholds 0.50:0.99:0.01 --max-risk 0.01 --confidence-level 0.95 --output results/nimble-risk-control-1pct.json",
+    "uv run systemone-risk-control --details results/20261004-012101-details.jsonl results/20261005-033733-details.jsonl results/20261005-042132-details.jsonl results/20261005-052440-details.jsonl --model nimble --thresholds 0.50:0.99:0.01 --max-risk 0.015 --confidence-level 0.95 --output results/nimble-risk-control-1p5pct.json"
+  ],
+  "local_outputs": [
+    "results/nimble-risk-control-1pct.json",
+    "results/nimble-risk-control-1p5pct.json"
+  ],
+  "note": "The 1.5% run is diagnostic only. No deployment candidate is frozen by this record. Any policy derived from these development runs requires validation on a new untouched fresh holdout."
+}
