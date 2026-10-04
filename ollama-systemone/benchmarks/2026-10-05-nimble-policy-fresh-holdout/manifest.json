@@ -23,6 +23,19 @@
   "artifacts": {
     "local_summary": "results/20261005-052440-summary.json",
     "local_details": "results/20261005-052440-details.jsonl",
-    "note": "Raw results remain gitignored. The fixed-policy CLI evaluation has not yet been run; policy pass/fail is already determined from the benchmark output because one incorrect implementation prediction has confidence above the frozen default threshold."
+    "note": "Raw results remain gitignored. The fixed-policy CLI evaluation was executed and found no feasible policy under min accepted accuracy 1.0.",
+    "local_fixed_policy": "results/20261005-052440-fixed-policy.json",
+    "fixed_policy_command": "uv run systemone-policy --details results/20261005-052440-details.jsonl --model nimble --default-threshold 0.60 --label-grid planning=0.80 --min-accepted-accuracy 1.0 --output results/20261005-052440-fixed-policy.json"
+  },
+  "fixed_policy_cli_result": {
+    "combinations_evaluated": 1,
+    "baseline": {
+      "coverage": 0.9857,
+      "accepted_accuracy": 0.9928,
+      "fallback": 0.0143,
+      "accepted_errors": 1
+    },
+    "feasible_policy_count": 0,
+    "verdict": "falsified"
   }
 }
