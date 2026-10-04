@@ -1,0 +1,64 @@
+{
+  "min_accepted_accuracy": 1,
+  "single_model_baselines": {
+    "tev1:4b": {
+      "threshold": "0.68",
+      "coverage": 0.52,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.48,
+      "avg_local_latency_ms": 9882.9,
+      "p95_local_latency_ms": 10045.9,
+      "local_calls_per_request": 1
+    },
+    "nimble": {
+      "threshold": "0.45..0.58",
+      "coverage": 0.96,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.04,
+      "avg_local_latency_ms": 19985.5,
+      "p95_local_latency_ms": 21456.6,
+      "local_calls_per_request": 1
+    }
+  },
+  "best_cascade": {
+    "thresholds": {
+      "tev1:4b": "0.68",
+      "nimble": "0.45..0.78"
+    },
+    "coverage": 0.96,
+    "accepted_accuracy": 1,
+    "fallback_rate": 0.04,
+    "avg_local_latency_ms": 19338.6,
+    "p95_local_latency_ms": 31299.9,
+    "local_calls_per_request": 1.48
+  },
+  "global_pareto_frontier": [
+    {
+      "configuration": "cascade:tev1:4b->nimble",
+      "coverage": 0.96,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.04,
+      "avg_local_latency_ms": 19338.6,
+      "p95_local_latency_ms": 31299.9,
+      "local_calls_per_request": 1.48
+    },
+    {
+      "configuration": "single:nimble",
+      "coverage": 0.96,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.04,
+      "avg_local_latency_ms": 19985.5,
+      "p95_local_latency_ms": 21456.6,
+      "local_calls_per_request": 1
+    },
+    {
+      "configuration": "single:tev1:4b",
+      "coverage": 0.52,
+      "accepted_accuracy": 1,
+      "fallback_rate": 0.48,
+      "avg_local_latency_ms": 9882.9,
+      "p95_local_latency_ms": 10045.9,
+      "local_calls_per_request": 1
+    }
+  ]
+}
