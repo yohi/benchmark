@@ -62,13 +62,13 @@ default = 0.60
 planning = 0.80
 ```
 
-## Derived fixed-policy metrics
+## Fixed-policy CLI confirmation
 
-The fixed-policy CLI has not yet been run for this holdout, but the benchmark summary is sufficient to determine the outcome.
+The frozen policy was evaluated directly with `systemone-policy` after the benchmark.
 
 At global threshold 0.60, 138 decisions are accepted with one accepted error. The planning-specific 0.80 override additionally rejects one correct planning prediction at confidence 0.631908.
 
-Therefore the frozen policy is expected to produce:
+The frozen class-aware policy itself produces:
 
 - local accepted: 137/140
 - local coverage: **97.86%**
@@ -77,7 +77,17 @@ Therefore the frozen policy is expected to produce:
 - fallback: 3/140 = **2.14%**
 - accepted errors: **1**
 
-Run `systemone-policy` to create the canonical fixed-policy output artifact, but the pass/fail conclusion cannot change.
+`systemone-policy` evaluated exactly one candidate (`default=0.60`, `planning=0.80`) and reported:
+
+```text
+Policy analysis: model=nimble decisions=140 default=0.60 combinations=1 min accepted accuracy=1.0000
+Baseline: coverage=0.9857 accepted_acc=0.9928 fallback=0.0143 accepted_errors=1
+
+Top feasible policies by local coverage:
+No policy satisfies the requested accepted-accuracy constraint.
+```
+
+The canonical output was written to `results/20261005-052440-fixed-policy.json`. This independently confirms the FAIL verdict.
 
 ## Interpretation
 
