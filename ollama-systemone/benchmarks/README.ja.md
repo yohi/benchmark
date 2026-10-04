@@ -37,5 +37,6 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 - `2026-10-05-nimble-implementation-boundary/` — 125 件 Adversarial Validation。threshold 0.60 で Accepted Accuracy 100% を維持し、Implementation Attractor が再現しなかった記録
 - `2026-10-05-nimble-policy-fresh-holdout/` — Balanced Fresh Validation。`default=0.60 / planning=0.80` Candidate を High-confidence な documentation → implementation Error が反証した記録
 - `2026-10-05-nimble-selective-confidence/` — Nimble 4 Run横断のCalibration / Selective Classification分析。Absolute Confidence Calibrationは弱い一方、Error Ranking Signalは強いことを確認した記録
+- `2026-10-05-nimble-selective-risk-control/` — Exact Binomial Selective Risk Control分析。1%は現在のEvidence量ではcertify不能、1.5% Diagnosticではthreshold 0.80がDevelopment Coverage 88.29%・Accepted Error 0件でfeasibleとなった記録
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
