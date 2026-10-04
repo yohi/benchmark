@@ -62,6 +62,19 @@
     "accepted_accuracy": 0.992701,
     "fallback_count": 3,
     "fallback_rate": 0.021429,
-    "note": "Derived from the benchmark summary: global 0.60 accepted 138 with one accepted error; planning=0.80 additionally rejects one correct planning prediction at confidence 0.631908. Run systemone-policy for the canonical CLI artifact."
+    "note": "Derived metrics remain for the exact frozen class-aware policy; the canonical CLI evaluation independently confirmed that the single candidate is infeasible under min accepted accuracy 1.0."
+  },
+  "canonical_fixed_policy_evaluation": {
+    "command": "uv run systemone-policy --details results/20261005-052440-details.jsonl --model nimble --default-threshold 0.60 --label-grid planning=0.80 --min-accepted-accuracy 1.0 --output results/20261005-052440-fixed-policy.json",
+    "combinations_evaluated": 1,
+    "minimum_accepted_accuracy": 1,
+    "baseline": {
+      "coverage": 0.9857,
+      "accepted_accuracy": 0.9928,
+      "fallback_rate": 0.0143,
+      "accepted_errors": 1
+    },
+    "feasible_policy_count": 0,
+    "result": "No policy satisfies the requested accepted-accuracy constraint."
   }
 }
