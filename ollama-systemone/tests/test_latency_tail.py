@@ -89,6 +89,66 @@ class LatencyTailTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["latency_ms"], 100.0)
 
+    def test_analyze_detects_prefix_tail_when_bucket_median_does_not(self) -> None:
+        latencies = [
+            30000,
+            30000,
+            15000,
+            15000,
+            15000,
+            15000,
+            15000,
+            15000,
+            15000,
+            15000,
+        ]
+        data = [
+            {
+                "model": "nimble",
+                "case_id": f"case-{index + 1}",
+                "pass": 1,
+                "question": "route",
+                "latency_ms": latency,
+                "expected": "implementation",
+                "prediction": "implementation",
+                "correct": True,
+                "confidence": 0.9,
+                "metadata": {
+                    "source_family": "test",
+                    "scenario_family": "scenario",
+                },
+            }
+            for index, latency in enumerate(latencies)
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "details.jsonl"
+            path.write_text(
+                "".join(json.dumps(row) + "\n" for row in data),
+                encoding="utf-8",
+            )
+            result = analyze(
+                path,
+                "nimble",
+                prefixes=[5],
+                buckets=2,
+                top=5,
+                late_start=6,
+                tail_multiplier=1.5,
+            )
+
+        self.assertFalse(
+            result["diagnostics"]["first_bucket_median_warmup_like"]
+        )
+        self.assertTrue(
+            result["diagnostics"]["prefix_concentrated_tail"]
+        )
+        self.assertEqual(
+            result["diagnostics"]["strongest_early_prefix"]["prefix_requests"],
+            5,
+        )
+        self.assertEqual(result["late_tail"]["tail_count"], 0)
+
     def test_analyze_flags_warmup_like_first_bucket(self) -> None:
         data = []
         for row in self.rows:
@@ -123,7 +183,9 @@ class LatencyTailTests(unittest.TestCase):
                 tail_multiplier=1.5,
             )
 
-        self.assertTrue(result["diagnostics"]["first_bucket_warmup_like"])
+        self.assertTrue(
+            result["diagnostics"]["first_bucket_median_warmup_like"]
+        )
         self.assertEqual(result["top_outliers"][0]["position"], 1)
 
 
