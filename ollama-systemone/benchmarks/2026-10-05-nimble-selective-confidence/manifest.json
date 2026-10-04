@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "analysis": "selective-confidence",
+  "recorded_at": "2026-10-05",
+  "model": "nimble",
+  "detail_files": [
+    "results/20261004-012101-details.jsonl",
+    "results/20261005-033733-details.jsonl",
+    "results/20261005-042132-details.jsonl",
+    "results/20261005-052440-details.jsonl"
+  ],
+  "command": "uv run systemone-selective --details results/20261004-012101-details.jsonl results/20261005-033733-details.jsonl results/20261005-042132-details.jsonl results/20261005-052440-details.jsonl --model nimble --bins 10 --output results/nimble-selective-confidence.json",
+  "local_output": "results/nimble-selective-confidence.json",
+  "note": "The four analyzed runs are treated independently. Any policy derived from this analysis requires validation on a new untouched fresh set."
+}
