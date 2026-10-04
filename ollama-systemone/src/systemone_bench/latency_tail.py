@@ -227,14 +227,38 @@ def analyze(
 
     first_bucket = position[0] if position else None
     remaining_buckets = position[1:] if len(position) > 1 else []
-    warmup_like = False
+    first_bucket_median_warmup_like = False
     if first_bucket and remaining_buckets:
         remainder_median = statistics.median(
             float(bucket["median_ms"]) for bucket in remaining_buckets
         )
-        warmup_like = (
+        first_bucket_median_warmup_like = (
             float(first_bucket["median_ms"]) >= remainder_median * 1.25
         )
+
+    eligible_prefixes = [
+        item for item in prefix
+        if 5 <= int(item["prefix_requests"]) < late_start
+    ]
+    strongest_prefix = (
+        max(eligible_prefixes, key=lambda item: float(item["mean_ratio"]))
+        if eligible_prefixes else None
+    )
+    prefix_concentrated_tail = bool(
+        strongest_prefix is not None
+        and float(strongest_prefix["mean_ratio"]) >= 1.25
+        and int(late_tail["tail_count"]) == 0
+    )
+
+    top_outlier_prefix_count = sum(
+        1
+        for row in outliers
+        if int(row["position"]) < late_start
+    )
+    top_outlier_prefix_fraction = (
+        top_outlier_prefix_count / len(outliers)
+        if outliers else None
+    )
 
     return {
         "detail_file": str(path),
@@ -248,11 +272,26 @@ def analyze(
         "by_scenario_family": group_latency(rows, "metadata.scenario_family"),
         "late_tail": late_tail,
         "diagnostics": {
-            "first_bucket_warmup_like": warmup_like,
+            "first_bucket_median_warmup_like": (
+                first_bucket_median_warmup_like
+            ),
+            "prefix_concentrated_tail": prefix_concentrated_tail,
+            "strongest_early_prefix": (
+                {
+                    "prefix_requests": strongest_prefix["prefix_requests"],
+                    "mean_ratio": strongest_prefix["mean_ratio"],
+                    "median_ratio": strongest_prefix["median_ratio"],
+                }
+                if strongest_prefix is not None else None
+            ),
+            "top_outlier_prefix_count": top_outlier_prefix_count,
+            "top_outlier_prefix_fraction": top_outlier_prefix_fraction,
             "note": (
-                "warmup-like means the first position bucket median is at "
-                "least 25% slower than the median of later bucket medians. "
-                "This is a heuristic, not causal proof."
+                "prefix_concentrated_tail requires an early prefix of at least "
+                "5 requests and before late-start whose mean is at least 25% "
+                "slower than the remainder, with no late-tail events at the "
+                "configured threshold. The first-bucket median flag is retained "
+                "as a secondary coarse diagnostic. Neither flag is causal proof."
             ),
         },
     }
@@ -370,8 +409,24 @@ def main() -> None:
         f"count={late['tail_count']}"
     )
     print(
-        "First position bucket warmup-like: "
-        f"{result['diagnostics']['first_bucket_warmup_like']}"
+        "Prefix-concentrated tail: "
+        f"{result['diagnostics']['prefix_concentrated_tail']}"
+    )
+    strongest = result["diagnostics"]["strongest_early_prefix"]
+    if strongest is not None:
+        print(
+            "Strongest early prefix: "
+            f"first {strongest['prefix_requests']} "
+            f"mean_ratio={strongest['mean_ratio']:.3f}"
+        )
+    print(
+        "First bucket median warmup-like: "
+        f"{result['diagnostics']['first_bucket_median_warmup_like']}"
+    )
+    print(
+        "Top-outlier prefix concentration: "
+        f"{result['diagnostics']['top_outlier_prefix_count']}/"
+        f"{len(result['top_outliers'])}"
     )
 
     if args.output:
