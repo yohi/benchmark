@@ -6,11 +6,61 @@ import json
 from pathlib import Path
 from typing import Any
 
-from systemone_bench.cascade import (
-    DecisionKey,
-    load_details,
-    parse_threshold_grid,
-)
+from systemone_bench.cascade import DecisionKey, parse_threshold_grid
+
+
+def load_policy_details(
+    paths: list[Path],
+) -> dict[str, dict[DecisionKey, dict[str, Any]]]:
+    by_model: dict[str, dict[DecisionKey, dict[str, Any]]] = {}
+
+    for path in paths:
+        with path.open(encoding="utf-8") as f:
+            for line_no, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                try:
+                    model = str(row["model"])
+                    case_id = str(row["case_id"])
+                    pass_no = int(row["pass"])
+                    question = str(row["question"])
+                except KeyError as exc:
+                    raise ValueError(
+                        f"{path}:{line_no}: missing required field "
+                        f"{exc.args[0]!r}"
+                    ) from exc
+
+                if row.get("correct") is None:
+                    raise ValueError(
+                        f"{path}:{line_no}: policy analysis requires "
+                        "labeled decisions (correct must not be null)"
+                    )
+                if not isinstance(row.get("confidence"), (int, float)):
+                    raise ValueError(
+                        f"{path}:{line_no}: policy analysis requires "
+                        "numeric confidence"
+                    )
+                if row.get("prediction") is None:
+                    raise ValueError(
+                        f"{path}:{line_no}: policy analysis requires "
+                        "a non-null prediction"
+                    )
+
+                key = (case_id, pass_no, question)
+                model_rows = by_model.setdefault(model, {})
+                if key in model_rows:
+                    raise ValueError(
+                        f"duplicate decision for model={model!r}, "
+                        f"case={case_id!r}, pass={pass_no}, "
+                        f"question={question!r}; do not mix duplicate runs"
+                    )
+                model_rows[key] = row
+
+    if not by_model:
+        raise ValueError("no detail rows found")
+    return by_model
 
 
 def parse_label_grid(spec: str) -> tuple[str, list[float]]:
@@ -331,7 +381,7 @@ def main() -> None:
                 "increase --max-combinations or reduce the grids"
             )
 
-        by_model = load_details(args.details)
+        by_model = load_policy_details(args.details)
         keys, observed_labels = validate_model(by_model, args.model)
         unknown_labels = sorted(set(label_grids) - observed_labels)
         if unknown_labels:
@@ -362,10 +412,14 @@ def main() -> None:
         f"default={args.default_threshold:.2f} combinations={evaluated_count} "
         f"min accepted accuracy={args.min_accepted_accuracy:.4f}"
     )
+    baseline_accuracy = baseline["accepted_accuracy"]
+    baseline_accuracy_text = (
+        "n/a" if baseline_accuracy is None else f"{baseline_accuracy:.4f}"
+    )
     print(
         "Baseline: "
         f"coverage={baseline['local_coverage']:.4f} "
-        f"accepted_acc={baseline['accepted_accuracy']:.4f} "
+        f"accepted_acc={baseline_accuracy_text} "
         f"fallback={baseline['fallback_rate']:.4f} "
         f"accepted_errors={len(baseline['accepted_errors'])}"
     )
