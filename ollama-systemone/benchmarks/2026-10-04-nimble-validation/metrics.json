@@ -1,0 +1,139 @@
+{
+  "requests": 210,
+  "decisions": 210,
+  "latency_ms": {
+    "mean": 20749.887,
+    "p50": 21199.434,
+    "p90": 21378.101,
+    "p95": 21465.327,
+    "p99": 21623.39
+  },
+  "requests_per_second": 0.048,
+  "raw_accuracy": 0.990476,
+  "thresholds": {
+    "0.40": {
+      "coverage": 0.995238,
+      "accepted_accuracy": 0.995215,
+      "escalation_rate": 0.004762,
+      "n": 209
+    },
+    "0.45": {
+      "coverage": 0.995238,
+      "accepted_accuracy": 0.995215,
+      "escalation_rate": 0.004762,
+      "n": 209
+    },
+    "0.50": {
+      "coverage": 0.985714,
+      "accepted_accuracy": 0.995169,
+      "escalation_rate": 0.014286,
+      "n": 207
+    },
+    "0.55": {
+      "coverage": 0.980952,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.019048,
+      "n": 206
+    },
+    "0.58": {
+      "coverage": 0.980952,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.019048,
+      "n": 206
+    },
+    "0.60": {
+      "coverage": 0.97619,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.02381,
+      "n": 205
+    },
+    "0.65": {
+      "coverage": 0.971429,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.028571,
+      "n": 204
+    },
+    "0.70": {
+      "coverage": 0.961905,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.038095,
+      "n": 202
+    }
+  },
+  "errors": [
+    {
+      "case_id": "validation-098-debug",
+      "expected": "debug",
+      "prediction": "implementation",
+      "confidence": 0.542108
+    },
+    {
+      "case_id": "validation-140-planning",
+      "expected": "planning",
+      "prediction": "implementation",
+      "confidence": 0.277578
+    }
+  ],
+  "by_expected": {
+    "debug": {
+      "decisions": 30,
+      "raw_accuracy": 0.966667,
+      "mean_confidence": 0.857304
+    },
+    "deterministic": {
+      "decisions": 30,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.927127
+    },
+    "documentation": {
+      "decisions": 30,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.929529
+    },
+    "implementation": {
+      "decisions": 30,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.903135
+    },
+    "planning": {
+      "decisions": 30,
+      "raw_accuracy": 0.966667,
+      "mean_confidence": 0.933955
+    },
+    "research": {
+      "decisions": 30,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.884521
+    },
+    "review": {
+      "decisions": 30,
+      "raw_accuracy": 1,
+      "mean_confidence": 0.90237
+    }
+  },
+  "confusion_matrix": {
+    "debug": {
+      "debug": 29,
+      "implementation": 1
+    },
+    "deterministic": {
+      "deterministic": 30
+    },
+    "documentation": {
+      "documentation": 30
+    },
+    "implementation": {
+      "implementation": 30
+    },
+    "planning": {
+      "planning": 29,
+      "implementation": 1
+    },
+    "research": {
+      "research": 30
+    },
+    "review": {
+      "review": 30
+    }
+  }
+}
