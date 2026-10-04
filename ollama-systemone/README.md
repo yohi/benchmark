@@ -243,6 +243,52 @@ Primary checkpoint:
 
 Do not lower or raise the threshold based on this run and then continue to call this dataset an untouched holdout. If the routing policy changes after inspecting this result, validate the revised policy on another fresh set.
 
+### Class-aware policy fresh holdout
+
+`datasets/engineering-routing-policy-fresh-holdout.jsonl` is the fresh validation set for the class-aware Nimble policy selected after the production-derived set became development evidence.
+
+The policy is frozen before measurement:
+
+```text
+default threshold = 0.60
+predicted planning threshold = 0.80
+```
+
+The holdout contains 140 cases, balanced at 20 cases for each routing class. The balance is intentional: this stage is testing generalization of a fixed policy, not estimating production workload frequency.
+
+Run the benchmark:
+
+```bash
+uv run systemone-bench \
+  --models nimble \
+  --dataset datasets/engineering-routing-policy-fresh-holdout.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --cache-reset unload \
+  --thresholds 0.60,0.80
+```
+
+Then evaluate exactly one fixed class-aware policy:
+
+```bash
+uv run systemone-policy \
+  --details results/<RUN_ID>-details.jsonl \
+  --model nimble \
+  --default-threshold 0.60 \
+  --label-grid planning=0.80 \
+  --min-accepted-accuracy 1.0 \
+  --output results/<RUN_ID>-fixed-policy.json
+```
+
+Primary gate: accepted accuracy at the frozen policy.
+
+If the fixed policy accepts any incorrect decision, treat the candidate as falsified. Do not retune on this holdout and continue to call it fresh evidence.
+
+See:
+
+- `datasets/engineering-routing-policy-fresh-holdout.md`
+- `datasets/engineering-routing-policy-fresh-holdout.ja.md`
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
