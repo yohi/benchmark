@@ -1,0 +1,73 @@
+{
+  "requests": 50,
+  "decisions": 50,
+  "latency_ms": {
+    "mean": 9882.941,
+    "p50": 9875.487,
+    "p90": 9973.531,
+    "p95": 10045.909,
+    "p99": 10127.736
+  },
+  "requests_per_second": 0.101,
+  "raw_accuracy": 0.96,
+  "thresholds": {
+    "0.70": {
+      "coverage": 0.5,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.5,
+      "n": 25
+    },
+    "0.75": {
+      "coverage": 0.38,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.62,
+      "n": 19
+    },
+    "0.80": {
+      "coverage": 0.26,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.74,
+      "n": 13
+    },
+    "0.85": {
+      "coverage": 0.2,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.8,
+      "n": 10
+    },
+    "0.90": {
+      "coverage": 0.14,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.86,
+      "n": 7
+    },
+    "0.95": {
+      "coverage": 0.1,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.9,
+      "n": 5
+    },
+    "0.98": {
+      "coverage": 0.02,
+      "accepted_accuracy": 1,
+      "escalation_rate": 0.98,
+      "n": 1
+    },
+    "0.99": {
+      "coverage": 0,
+      "accepted_accuracy": null,
+      "escalation_rate": 1,
+      "n": 0
+    }
+  },
+  "errors": [
+    {
+      "case_id": "semantic-06-implementation",
+      "confidence": 0.677913
+    },
+    {
+      "case_id": "semantic-18-research",
+      "confidence": 0.550183
+    }
+  ]
+}

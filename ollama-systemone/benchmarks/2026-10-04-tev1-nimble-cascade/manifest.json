@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "benchmark": "ollama-systemone-cascade",
+  "recorded_at": "2026-10-04",
+  "source_runs": [
+    "20261003-140920",
+    "20261003-142036"
+  ],
+  "models": [
+    "tev1:4b",
+    "nimble"
+  ],
+  "dataset": "datasets/engineering-routing-golden.jsonl",
+  "decisions": 50,
+  "command": "uv run systemone-cascade --details results/20261003-140920-details.jsonl results/20261003-142036-details.jsonl --models tev1:4b,nimble --thresholds 0.40:0.95:0.01,0.98,0.99 --min-accepted-accuracy 1.0 --output results/tev1-nimble-cascade.json",
+  "artifacts": {
+    "local_output": "results/tev1-nimble-cascade.json",
+    "note": "Derived offline from the two recorded golden-set detail files. Raw results remain gitignored."
+  }
+}
