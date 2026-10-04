@@ -1,0 +1,62 @@
+{
+  "decisions": 615,
+  "candidates": 50,
+  "family_alpha": 0.05,
+  "pointwise_alpha": 0.001,
+  "runs": {
+    "max_risk_0.01": {
+      "zero_error_sample_requirement": 688,
+      "feasible_policy": false,
+      "reason": "Current development pool has only 615 total decisions; even a zero-error threshold cannot meet the simultaneous 1% upper-risk target unless it accepts at least 688 decisions.",
+      "threshold_0_80": {
+        "coverage": 0.8829,
+        "accepted": 543,
+        "errors": 0,
+        "empirical_risk": 0,
+        "upper_risk_bound": 0.0126
+      }
+    },
+    "max_risk_0.015": {
+      "zero_error_sample_requirement": 458,
+      "feasible_policy": true,
+      "selected_threshold": 0.8,
+      "coverage": 0.8829,
+      "accepted": 543,
+      "errors": 0,
+      "empirical_risk": 0,
+      "upper_risk_bound": 0.0126,
+      "per_file": [
+        {
+          "run_id": "20261004-012101",
+          "coverage": 0.9095,
+          "accepted": 191,
+          "errors": 0
+        },
+        {
+          "run_id": "20261005-033733",
+          "coverage": 0.784,
+          "accepted": 98,
+          "errors": 0
+        },
+        {
+          "run_id": "20261005-042132",
+          "coverage": 0.8786,
+          "accepted": 123,
+          "errors": 0
+        },
+        {
+          "run_id": "20261005-052440",
+          "coverage": 0.9357,
+          "accepted": 131,
+          "errors": 0
+        }
+      ],
+      "status": "diagnostic_only"
+    }
+  },
+  "decision": {
+    "one_percent": "not certifiable with current evidence volume",
+    "one_point_five_percent": "statistically feasible on development evidence, but not adopted as a product/safety requirement",
+    "next_step": "predeclare an acceptable risk requirement before freezing any threshold; if 1% remains the requirement, gather more independent development evidence or reduce the predeclared candidate family"
+  }
+}
