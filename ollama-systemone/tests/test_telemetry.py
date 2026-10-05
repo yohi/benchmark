@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from systemone_bench.telemetry import (
     _matches_ollama,
+    _ollama_process_tree,
     cpu_frequency_summary,
     derive_request_telemetry,
     temperature_summary,
@@ -88,6 +89,31 @@ class TelemetryTests(unittest.TestCase):
         process.cmdline.side_effect = psutil.AccessDenied(pid=123)
 
         self.assertTrue(_matches_ollama(process))
+
+    @patch("systemone_bench.telemetry.psutil.process_iter")
+    def test_ollama_process_tree_includes_descendants(
+        self,
+        process_iter_mock: MagicMock,
+    ) -> None:
+        root = MagicMock()
+        root.pid = 10
+        root.name.return_value = "ollama"
+        root.exe.return_value = "/usr/bin/ollama"
+        root.cmdline.return_value = ["/usr/bin/ollama", "serve"]
+
+        child = MagicMock()
+        child.pid = 11
+        child.name.return_value = "runner"
+        child.exe.return_value = "/opt/runner"
+        child.cmdline.return_value = ["/opt/runner"]
+
+        root.children.return_value = [child]
+        child.children.return_value = []
+        process_iter_mock.return_value = [root, child]
+
+        result = _ollama_process_tree()
+
+        self.assertEqual([process.pid for process in result], [10, 11])
 
     @patch("systemone_bench.telemetry.psutil.cpu_freq")
     def test_cpu_frequency_summary_aggregates_per_cpu(
