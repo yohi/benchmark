@@ -76,12 +76,15 @@ Arbitrary Command-line SubstringではなくProcess / Executable NameでOllama P
 
 これにより `ollama-systemone` のようなRepository PathによるFalse Positiveを避ける。
 
-Before / After:
+Before / AfterではOllama Daemonだけでなく、**Executable Nameに関係なくDaemonの全Descendant Process**を集計する。
 
-- Ollama PID
+- PID
+- Parent PID
 - Process Create Time
 - Aggregate RSS
 - Aggregate CPU Time
+
+Model Runner WorkがDaemon本体ではなくChild Processで実行される可能性があるため、Process Tree単位の集計が必要。
 
 Derived:
 
@@ -156,3 +159,12 @@ Analyzerは、次にどのControlled Follow-upを行う価値があるか決め�
 - Quality Evidence
 
 Fixed 35 Request WorkloadはLatency-only Evidenceのまま。
+
+
+## First Telemetry RunのValidation Note
+
+最初のTelemetry-enabled Run (`20261005-215311`) ではDerived Ollama CPU Utilizationが約0.18〜0.26%と不自然に低かった。
+
+System-level FieldはPreliminary Explorationに利用できるが、Ollama CPU / RSS AttributionはIncompleteとして扱う。
+
+CollectorをOllama Daemon + 全Descendant集計へ修正したため、Ollama Process CPU / RSSから結論を出す前にTelemetry Studyを再実行する。
