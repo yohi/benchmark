@@ -78,12 +78,15 @@ The collector identifies processes by process/executable name, not by arbitrary 
 
 This avoids false positives from repository paths such as `ollama-systemone`.
 
-Before and after each request it records:
+Before and after each request it records the Ollama daemon **and all of its descendant processes**, regardless of descendant executable name:
 
-- matching Ollama PIDs
+- matching/descendant PIDs
+- parent PIDs
 - process create times
 - aggregate RSS
 - aggregate CPU time
+
+This process-tree aggregation is required because model runner work may execute in child processes rather than in the daemon itself.
 
 Derived values:
 
@@ -160,3 +163,12 @@ This follow-up does not change:
 - quality evidence
 
 The fixed 35-request workload remains latency-only evidence.
+
+
+## Validation note for the first telemetry run
+
+The first telemetry-enabled run (`20261005-215311`) produced implausibly low derived Ollama CPU utilization (~0.18–0.26%).
+
+System-level fields from that run remain usable for preliminary exploration, but the Ollama CPU/RSS attribution must be treated as incomplete.
+
+The collector was corrected to aggregate the Ollama daemon plus all descendants. Re-run the telemetry study after this correction before drawing conclusions from Ollama process CPU/RSS metrics.
