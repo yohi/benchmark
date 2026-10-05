@@ -70,6 +70,12 @@ METRICS = {
     "ollama_cpu_percent_over_request": (
         "request_telemetry.derived.ollama_cpu_percent_over_request"
     ),
+    "ollama_process_count_before": (
+        "request_telemetry.before.ollama.process_count"
+    ),
+    "ollama_descendant_only_count_before": (
+        "request_telemetry.before.ollama.descendant_only_process_count"
+    ),
 }
 
 
@@ -119,6 +125,38 @@ def metric_summary(
     }
 
 
+def group_diagnostics(
+    rows: list[dict[str, Any]],
+    spike_threshold: float,
+) -> dict[str, Any]:
+    if not rows:
+        return {
+            "requests": 0,
+            "median_latency_ms": None,
+            "spike_count": 0,
+            "spike_rate": None,
+            "metrics": {},
+        }
+
+    spikes = [
+        row for row in rows
+        if float(row["latency_ms"]) >= spike_threshold
+    ]
+    metrics = {
+        name: metric_summary(rows, path)
+        for name, path in METRICS.items()
+    }
+    return {
+        "requests": len(rows),
+        "median_latency_ms": statistics.median(
+            float(row["latency_ms"]) for row in rows
+        ),
+        "spike_count": len(spikes),
+        "spike_rate": len(spikes) / len(rows),
+        "metrics": metrics,
+    }
+
+
 def analyze(
     rows: list[dict[str, Any]],
     spike_multiplier: float,
@@ -154,6 +192,14 @@ def analyze(
         reverse=True,
     )[:top]
 
+    grouped_trials: dict[str, list[dict[str, Any]]] = {}
+    grouped_profiles: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        trial_key = str(row.get("trial_order"))
+        profile_key = str(row.get("profile"))
+        grouped_trials.setdefault(trial_key, []).append(row)
+        grouped_profiles.setdefault(profile_key, []).append(row)
+
     return {
         "requests": len(rows),
         "median_latency_ms": median_latency,
@@ -162,6 +208,17 @@ def analyze(
         "spike_count": len(spikes),
         "spike_rate": len(spikes) / len(rows),
         "metrics": metric_results,
+        "by_trial": {
+            key: group_diagnostics(group, spike_threshold)
+            for key, group in sorted(
+                grouped_trials.items(),
+                key=lambda item: int(item[0]) if item[0].isdigit() else item[0],
+            )
+        },
+        "by_profile": {
+            key: group_diagnostics(group, spike_threshold)
+            for key, group in sorted(grouped_profiles.items())
+        },
         "top_latency_requests": [
             {
                 "latency_ms": float(row["latency_ms"]),
@@ -236,6 +293,15 @@ def main() -> None:
             f"r={all_summary['latency_pearson_r']} "
             f"spike_mean={spike_summary['mean']} "
             f"non_spike_mean={normal_summary['mean']}"
+        )
+
+    print("\nBy trial:")
+    for trial, summary in result["by_trial"].items():
+        print(
+            f"  trial={trial}: requests={summary['requests']} "
+            f"median={summary['median_latency_ms']:.1f}ms "
+            f"spikes={summary['spike_count']} "
+            f"rate={summary['spike_rate']:.3f}"
         )
 
     print("\nTop latency requests:")
