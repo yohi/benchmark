@@ -79,6 +79,16 @@ class TelemetryTests(unittest.TestCase):
         process.name.return_value = "ollama"
         self.assertTrue(_matches_ollama(process))
 
+    def test_process_match_survives_partial_access_denied(self) -> None:
+        import psutil
+
+        process = MagicMock()
+        process.name.return_value = "ollama"
+        process.exe.side_effect = psutil.AccessDenied(pid=123)
+        process.cmdline.side_effect = psutil.AccessDenied(pid=123)
+
+        self.assertTrue(_matches_ollama(process))
+
     @patch("systemone_bench.telemetry.psutil.cpu_freq")
     def test_cpu_frequency_summary_aggregates_per_cpu(
         self,
