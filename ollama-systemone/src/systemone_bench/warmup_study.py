@@ -319,7 +319,13 @@ def reset_runtime(
     if not command:
         raise ValueError("restart command must not be empty")
 
-    subprocess.run(command, check=True)
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            "restart command failed with "
+            f"exit status {exc.returncode}: {restart_command}"
+        ) from exc
 
     if restart_wait > 0:
         time.sleep(restart_wait)
