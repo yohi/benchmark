@@ -131,6 +131,32 @@ class WarmupStudyTests(unittest.TestCase):
             "sudo -n systemctl restart ollama",
         )
 
+    @patch("systemone_bench.warmup_study.subprocess.run")
+    def test_restart_reset_wraps_command_failure(
+        self,
+        run_mock: MagicMock,
+    ) -> None:
+        import subprocess
+
+        run_mock.side_effect = subprocess.CalledProcessError(
+            1,
+            ["sudo", "systemctl", "restart", "ollama"],
+        )
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "restart command failed with exit status 1",
+        ):
+            reset_runtime(
+                client=MagicMock(),
+                base_url="http://localhost:11434",
+                model="nimble",
+                reset_mode="restart",
+                restart_command="sudo systemctl restart ollama",
+                restart_wait=0.0,
+                timeout=30.0,
+            )
+
     def test_restart_reset_requires_command(self) -> None:
         with self.assertRaisesRegex(
             ValueError,
