@@ -79,6 +79,22 @@ class SpikeAnalysisTests(unittest.TestCase):
             2000.0,
         )
 
+    def test_analyze_reports_trial_stratification(self) -> None:
+        rows = [
+            row(100.0, 3000.0, 1.0, 100.0, 1),
+            row(100.0, 3000.0, 1.0, 100.0, 2),
+            row(200.0, 2000.0, 2.0, 200.0, 3),
+            row(100.0, 3000.0, 1.0, 100.0, 4),
+        ]
+        rows[2]["trial_order"] = 2
+        rows[3]["trial_order"] = 2
+
+        result = analyze(rows, spike_multiplier=1.25, top=2)
+
+        self.assertEqual(result["by_trial"]["1"]["spike_count"], 0)
+        self.assertEqual(result["by_trial"]["2"]["spike_count"], 1)
+        self.assertEqual(result["by_trial"]["2"]["requests"], 2)
+
     def test_load_rows_ignores_rows_without_telemetry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "details.jsonl"
