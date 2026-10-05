@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "analysis": "warmup-stabilization-study",
+  "recorded_at": "2026-10-05",
+  "model": "nimble",
+  "run_id": "20261005-084143",
+  "dataset": "datasets/latency-warmup-fixed-workload.jsonl",
+  "repeats": 2,
+  "trial_schedule": [
+    {
+      "trial": 1,
+      "repeat": 1,
+      "profile": "synthetic-1"
+    },
+    {
+      "trial": 2,
+      "repeat": 1,
+      "profile": "representative-7"
+    },
+    {
+      "trial": 3,
+      "repeat": 2,
+      "profile": "representative-7"
+    },
+    {
+      "trial": 4,
+      "repeat": 2,
+      "profile": "synthetic-1"
+    }
+  ],
+  "reset": "model unload before every trial",
+  "local_artifacts": [
+    "results/20261005-084143-warmup-study-details.jsonl",
+    "results/20261005-084143-warmup-study.json"
+  ],
+  "tests": {
+    "passed": 54,
+    "failed": 0
+  },
+  "conclusion": "representative-7 did not improve latency; chronological repeat effect dominates profile effect",
+  "next_hypothesis": "model unload does not reset all runtime/host stabilization state; use a stronger reset experiment before changing warmup policy"
+}
