@@ -11,6 +11,7 @@ from systemone_bench.warmup_study import (
     aggregate_profile_trials,
     build_profile_schedule,
     compare_profiles,
+    execute_measured_workload,
     representative_warmup_payloads,
     reset_runtime,
     summarize_trial,
@@ -171,6 +172,77 @@ class WarmupStudyTests(unittest.TestCase):
                 restart_wait=0.0,
                 timeout=30.0,
             )
+
+    @patch("systemone_bench.warmup_study.derive_request_telemetry")
+    @patch("systemone_bench.warmup_study.capture_request_telemetry")
+    @patch("systemone_bench.warmup_study.psutil.virtual_memory")
+    @patch("systemone_bench.warmup_study.psutil.cpu_percent")
+    def test_measured_workload_records_opt_in_request_telemetry(
+        self,
+        cpu_percent_mock: MagicMock,
+        virtual_memory_mock: MagicMock,
+        capture_mock: MagicMock,
+        derive_mock: MagicMock,
+    ) -> None:
+        cpu_percent_mock.side_effect = [10.0, 20.0]
+        virtual_memory_mock.side_effect = [
+            MagicMock(used=1000),
+            MagicMock(used=2000),
+        ]
+        capture_mock.side_effect = [{"sample": "before"}, {"sample": "after"}]
+        derive_mock.return_value = {"derived": {"sample": True}}
+
+        response = MagicMock()
+        response.raise_for_status.return_value = None
+        response.json.return_value = {
+            "answers": {
+                "route": {
+                    "choice": "implementation",
+                    "confidence": 0.9,
+                }
+            }
+        }
+        client = MagicMock()
+        client.post.return_value = response
+
+        rows = [
+            {
+                "id": "case-1",
+                "state": {"task": "Implement it."},
+                "questions": {
+                    "route": {
+                        "type": "choice",
+                        "instructions": "Classify.",
+                        "criteria": {
+                            "implementation": "Implement.",
+                            "review": "Review.",
+                        },
+                    }
+                },
+                "expected": {"route": "implementation"},
+                "metadata": {},
+            }
+        ]
+
+        result = execute_measured_workload(
+            client=client,
+            base_url="http://localhost:11434",
+            model="nimble",
+            keep_alive="10m",
+            rows=rows,
+            repeat=1,
+            profile=PROFILE_SYNTHETIC,
+            trial_order=1,
+            request_telemetry=True,
+        )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(
+            result[0]["request_telemetry"],
+            {"derived": {"sample": True}},
+        )
+        self.assertEqual(capture_mock.call_count, 2)
+        derive_mock.assert_called_once()
 
     def test_profile_comparison_reports_reduction(self) -> None:
         synthetic_trials = [
