@@ -117,24 +117,52 @@ def _matches_ollama(process: psutil.Process) -> bool:
     return _ollama_name(argv0)
 
 
-def ollama_process_snapshot() -> dict[str, Any]:
-    processes: list[dict[str, Any]] = []
+def _ollama_process_tree() -> list[psutil.Process]:
+    selected: dict[int, psutil.Process] = {}
+    roots: list[psutil.Process] = []
 
     for process in psutil.process_iter():
         if not _matches_ollama(process):
             continue
+        selected[process.pid] = process
+        roots.append(process)
+
+    for root in roots:
+        try:
+            children = root.children(recursive=True)
+        except (
+            psutil.NoSuchProcess,
+            psutil.AccessDenied,
+            psutil.ZombieProcess,
+        ):
+            continue
+        for child in children:
+            selected[child.pid] = child
+
+    return [
+        selected[pid]
+        for pid in sorted(selected)
+    ]
+
+
+def ollama_process_snapshot() -> dict[str, Any]:
+    processes: list[dict[str, Any]] = []
+
+    for process in _ollama_process_tree():
         try:
             cpu_times = process.cpu_times()
             memory = process.memory_info()
             processes.append(
                 {
                     "pid": process.pid,
+                    "ppid": process.ppid(),
                     "name": process.name(),
                     "create_time": process.create_time(),
                     "rss_bytes": int(memory.rss),
                     "cpu_time_seconds": float(
                         cpu_times.user + cpu_times.system
                     ),
+                    "matched_by_name": _matches_ollama(process),
                 }
             )
         except (
@@ -162,6 +190,14 @@ def ollama_process_snapshot() -> dict[str, Any]:
             }
             for process in processes
         ],
+        "named_process_count": sum(
+            1 for process in processes
+            if process["matched_by_name"]
+        ),
+        "descendant_only_process_count": sum(
+            1 for process in processes
+            if not process["matched_by_name"]
+        ),
     }
 
 
