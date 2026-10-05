@@ -607,11 +607,11 @@ uv run systemone-warmup-study \
   --dataset datasets/latency-warmup-fixed-workload.jsonl \
   --repeats 2 \
   --reset-mode restart \
-  --restart-command "sudo -n systemctl restart ollama" \
+  --restart-command "sudo systemctl restart ollama" \
   --restart-wait 2
 ```
 
-The command waits for `/api/tags` to become ready after each restart. Keep the restart command non-interactive and do not combine this first restart experiment with other host-level reset changes.
+The command waits for `/api/tags` to become ready after each restart. When launched from an interactive shell, `sudo systemctl restart ollama` may prompt through the inherited terminal. Do not combine this first restart experiment with other host-level reset changes.
 
 See:
 
