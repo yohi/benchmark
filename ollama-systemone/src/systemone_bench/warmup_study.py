@@ -493,7 +493,7 @@ def main() -> None:
         default="",
         help=(
             "command used with --reset-mode restart, e.g. "
-            "'sudo -n systemctl restart ollama'"
+            "'sudo systemctl restart ollama'"
         ),
     )
     ap.add_argument(
