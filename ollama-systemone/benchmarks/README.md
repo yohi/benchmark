@@ -34,5 +34,6 @@ If a threshold is later changed using evidence from a validation record, do not 
 - `2026-10-05-nimble-single-policy-risk-fresh/` — 350-case fresh validation of the predeclared Nimble threshold 0.80 policy. Accepted 349/350 with zero accepted errors and a 95% one-sided exact upper risk bound of 0.85%, passing the 1% gate.
 - `2026-10-05-nimble-latency-tail-analysis/` — offline request-order analysis showing the 31.88s p99 is strongly prefix-concentrated: first-5 mean is 1.907× the remainder and there are zero >=1.5×-median tail events after request 20.
 - `2026-10-05-nimble-warmup-stabilization/` — fixed-workload warmup comparison. Representative-7 did not improve latency; repeat-1 trials were spiky while repeat-2 trials were stable across both profiles, indicating chronological/runtime-state effects dominate warmup profile.
+- `2026-10-05-nimble-warmup-process-restart/` — repeated the same warmup study with Ollama service restart before every trial. The repeat-1/repeat-2 p95 gap shrank by ~89.7% for synthetic and ~84.9% for representative, strongly implicating process-local runtime state; sparse outliers remain.
 
 The first three entries were backfilled after the recording policy was introduced. Their raw `results/` artifacts remain local and gitignored; the committed manifests, metrics, and reports preserve the observed decision-relevant evidence.
