@@ -161,7 +161,7 @@ uv run systemone-warmup-study \
   --dataset datasets/latency-warmup-fixed-workload.jsonl \
   --repeats 2 \
   --reset-mode restart \
-  --restart-command "sudo -n systemctl restart ollama" \
+  --restart-command "sudo systemctl restart ollama" \
   --restart-wait 2
 ```
 
@@ -175,7 +175,7 @@ uv run systemone-warmup-study \
 
 HostごとにService Managementが異なるためRestart CommandはConfigurable。
 
-対話Password Promptを要求しないCommandを使う。systemd環境では、Current UserにNon-interactive Permissionがある場合のみ `sudo -n systemctl restart ollama` を使う。
+SubprocessはCurrent Terminalを継承するため、Interactive ShellからStudyを起動した場合は `sudo systemctl restart ollama` のPassword Promptをそのまま使用できる。Unattended Runでは別途Non-interactive Restart Mechanismを用意する。
 
 最初のRestart ExperimentではPage Cache Drop、CPU Governor変更などを同時に行わない。変更するReset Boundaryは1つだけにする。
 
