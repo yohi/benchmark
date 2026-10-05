@@ -88,20 +88,33 @@ def temperature_summary() -> dict[str, Any]:
     }
 
 
+def _ollama_name(candidate: str) -> bool:
+    value = candidate.lower()
+    return value == "ollama" or value.startswith("ollama_")
+
+
 def _matches_ollama(process: psutil.Process) -> bool:
     try:
-        name = (process.name() or "").lower()
-        exe_name = Path(process.exe() or "").name.lower()
-        cmdline = process.cmdline()
-        argv0 = Path(cmdline[0]).name.lower() if cmdline else ""
+        name = process.name() or ""
     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-        return False
+        name = ""
+    if _ollama_name(name):
+        return True
 
-    candidates = (name, exe_name, argv0)
-    return any(
-        candidate == "ollama" or candidate.startswith("ollama_")
-        for candidate in candidates
-    )
+    try:
+        exe_name = Path(process.exe() or "").name
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        exe_name = ""
+    if _ollama_name(exe_name):
+        return True
+
+    try:
+        cmdline = process.cmdline()
+        argv0 = Path(cmdline[0]).name if cmdline else ""
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        argv0 = ""
+
+    return _ollama_name(argv0)
 
 
 def ollama_process_snapshot() -> dict[str, Any]:
