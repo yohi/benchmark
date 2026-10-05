@@ -618,6 +618,42 @@ See:
 - `docs/warmup-stabilization-study.md`
 - `docs/warmup-stabilization-study.ja.md`
 
+### Request-level telemetry for sparse spikes
+
+After process restart has removed the broad chronological/prefix artifact, enable request telemetry only for diagnostic runs:
+
+```bash
+uv run systemone-warmup-study \
+  --model nimble \
+  --dataset datasets/latency-warmup-fixed-workload.jsonl \
+  --repeats 2 \
+  --reset-mode restart \
+  --restart-command "sudo systemctl restart ollama" \
+  --restart-wait 2 \
+  --request-telemetry
+```
+
+The details JSONL then records before/after CPU frequency, system load, optional temperature sensors, Ollama process PID/create time/RSS/CPU time, available memory, and derived per-request Ollama CPU/RSS/process-identity signals.
+
+Telemetry collection is outside the measured HTTP request timer and is opt-in because the sampling itself may slightly perturb later host state.
+
+Analyze the resulting details offline:
+
+```bash
+uv run systemone-spike-analysis \
+  --details results/<RUN_ID>-warmup-study-details.jsonl \
+  --spike-multiplier 1.25 \
+  --top 20 \
+  --output results/<RUN_ID>-spike-analysis.json
+```
+
+The analyzer compares spike vs non-spike telemetry and reports exploratory Pearson correlations. Treat these as hypothesis-generation evidence, not causal proof.
+
+See:
+
+- `docs/request-telemetry-spike-analysis.md`
+- `docs/request-telemetry-spike-analysis.ja.md`
+
 ## Recording benchmark evidence
 
 Raw run output under `results/` remains gitignored. Promote only decision-relevant runs into `benchmarks/`.
