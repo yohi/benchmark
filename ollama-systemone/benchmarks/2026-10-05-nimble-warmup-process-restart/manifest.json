@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "analysis": "warmup-process-restart-reset-study",
+  "recorded_at": "2026-10-05",
+  "model": "nimble",
+  "run_id": "20261005-205602",
+  "dataset": "datasets/latency-warmup-fixed-workload.jsonl",
+  "repeats": 2,
+  "reset_mode": "restart",
+  "restart_command": "sudo systemctl restart ollama",
+  "restart_wait_seconds": 2,
+  "tests": {
+    "passed": 57,
+    "failed": 0
+  },
+  "local_artifacts": [
+    "results/20261005-205602-warmup-study-details.jsonl",
+    "results/20261005-205602-warmup-study.json"
+  ],
+  "baseline_comparison": "2026-10-05-nimble-warmup-stabilization unload-reset study",
+  "conclusion": "process restart substantially attenuated the chronological repeat effect, implicating process-local Ollama/runtime state; representative-7 still showed no useful advantage",
+  "caveat": "restart did not eliminate all sparse latency spikes, so host-level/runtime noise may still remain"
+}

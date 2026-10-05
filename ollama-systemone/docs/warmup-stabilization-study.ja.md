@@ -137,3 +137,50 @@ Prefixが改善しない場合、以前のTailはWarmup回数や代表性だけ�
 このExperimentからValidated Routing Thresholdを変更しない。
 
 再利用35 CaseをIndependent Quality Validationとして扱わない。
+
+
+## Stronger Reset Follow-up
+
+最初のWarmup Studyでは、Warmup ProfileよりChronological Effectが強かった。
+
+```text
+repeat 1:
+  両ProfileでLarge Latency Spike
+
+repeat 2:
+  両ProfileともSteady-state付近
+```
+
+全TrialでModel Unloadを行っていたため、UnloadだけではLatencyへ影響する全StateをResetできていない可能性がある。
+
+そのためCLIにより強いReset Boundaryを追加する。
+
+```bash
+uv run systemone-warmup-study \
+  --model nimble \
+  --dataset datasets/latency-warmup-fixed-workload.jsonl \
+  --repeats 2 \
+  --reset-mode restart \
+  --restart-command "sudo systemctl restart ollama" \
+  --restart-wait 2
+```
+
+`--reset-mode restart` では各Trialで以下を行う。
+
+1. Configured Restart Commandを `subprocess.run(..., check=True)` で実行
+2. Configured Delayを待つ
+3. `/api/tags` をProbeしてOllama Readyを確認
+4. Warmup Profileを実行
+5. 同一35 Request Measured Workloadを実行
+
+HostごとにService Managementが異なるためRestart CommandはConfigurable。
+
+SubprocessはCurrent Terminalを継承するため、Interactive ShellからStudyを起動した場合は `sudo systemctl restart ollama` のPassword Promptをそのまま使用できる。Unattended Runでは別途Non-interactive Restart Mechanismを用意する。
+
+最初のRestart ExperimentではPage Cache Drop、CPU Governor変更などを同時に行わない。変更するReset Boundaryは1つだけにする。
+
+### Interpretation
+
+Process Restartで以前のRepeat 1 / Repeat 2差が消えるなら、Ollama / RuntimeのProcess-local State関与が強くなる。
+
+Chronological Effectが残るなら、次はCPU Frequency / Governor、Memory / Page Cache Residency、Scheduler、ThermalなどHost-level Stateを調べる。

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from systemone_bench.warmup_study import (
     PROFILE_REPRESENTATIVE,
@@ -11,6 +12,7 @@ from systemone_bench.warmup_study import (
     build_profile_schedule,
     compare_profiles,
     representative_warmup_payloads,
+    reset_runtime,
     summarize_trial,
 )
 
@@ -94,6 +96,81 @@ class WarmupStudyTests(unittest.TestCase):
         self.assertTrue(result["prefix_concentrated_tail"])
         self.assertGreater(result["first_5_mean_ratio"], 1.9)
         self.assertEqual(result["late_tail_count"], 0)
+
+    @patch("systemone_bench.warmup_study.wait_for_ollama")
+    @patch("systemone_bench.warmup_study.subprocess.run")
+    def test_restart_reset_runs_command_and_waits_for_readiness(
+        self,
+        run_mock: MagicMock,
+        wait_mock: MagicMock,
+    ) -> None:
+        client = MagicMock()
+
+        result = reset_runtime(
+            client=client,
+            base_url="http://localhost:11434",
+            model="nimble",
+            reset_mode="restart",
+            restart_command="sudo -n systemctl restart ollama",
+            restart_wait=0.0,
+            timeout=30.0,
+        )
+
+        run_mock.assert_called_once_with(
+            ["sudo", "-n", "systemctl", "restart", "ollama"],
+            check=True,
+        )
+        wait_mock.assert_called_once_with(
+            client,
+            "http://localhost:11434",
+            30.0,
+        )
+        self.assertEqual(result["mode"], "restart")
+        self.assertEqual(
+            result["restart_command"],
+            "sudo -n systemctl restart ollama",
+        )
+
+    @patch("systemone_bench.warmup_study.subprocess.run")
+    def test_restart_reset_wraps_command_failure(
+        self,
+        run_mock: MagicMock,
+    ) -> None:
+        import subprocess
+
+        run_mock.side_effect = subprocess.CalledProcessError(
+            1,
+            ["sudo", "systemctl", "restart", "ollama"],
+        )
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "restart command failed with exit status 1",
+        ):
+            reset_runtime(
+                client=MagicMock(),
+                base_url="http://localhost:11434",
+                model="nimble",
+                reset_mode="restart",
+                restart_command="sudo systemctl restart ollama",
+                restart_wait=0.0,
+                timeout=30.0,
+            )
+
+    def test_restart_reset_requires_command(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "restart mode requires --restart-command",
+        ):
+            reset_runtime(
+                client=MagicMock(),
+                base_url="http://localhost:11434",
+                model="nimble",
+                reset_mode="restart",
+                restart_command="",
+                restart_wait=0.0,
+                timeout=30.0,
+            )
 
     def test_profile_comparison_reports_reduction(self) -> None:
         synthetic_trials = [

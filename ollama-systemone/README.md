@@ -598,6 +598,21 @@ The 35-case workload is intentionally reused from an already-consumed benchmark 
 
 Compare first-request, first-5, first-10, first-20, after-20, p50/p95, and prefix-tail behavior. The goal is to test whether representative warmup removes the previously observed startup-shaped latency tail without changing the validated routing policy.
 
+
+For the stronger follow-up reset, restart the Ollama process/service before every trial:
+
+```bash
+uv run systemone-warmup-study \
+  --model nimble \
+  --dataset datasets/latency-warmup-fixed-workload.jsonl \
+  --repeats 2 \
+  --reset-mode restart \
+  --restart-command "sudo systemctl restart ollama" \
+  --restart-wait 2
+```
+
+The command waits for `/api/tags` to become ready after each restart. When launched from an interactive shell, `sudo systemctl restart ollama` may prompt through the inherited terminal. Do not combine this first restart experiment with other host-level reset changes.
+
 See:
 
 - `docs/warmup-stabilization-study.md`
