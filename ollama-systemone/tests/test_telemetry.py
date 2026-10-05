@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from systemone_bench.telemetry import (
+    _matches_ollama,
     cpu_frequency_summary,
     derive_request_telemetry,
     temperature_summary,
@@ -62,6 +63,21 @@ class TelemetryTests(unittest.TestCase):
         self.assertTrue(
             result["derived"]["ollama_process_identity_changed"]
         )
+
+    def test_process_match_does_not_use_project_path_substring(self) -> None:
+        process = MagicMock()
+        process.name.return_value = "python"
+        process.exe.return_value = "/usr/bin/python3"
+        process.cmdline.return_value = [
+            "/home/user/benchmark/ollama-systemone/.venv/bin/python",
+            "-m",
+            "systemone_bench.warmup_study",
+        ]
+
+        self.assertFalse(_matches_ollama(process))
+
+        process.name.return_value = "ollama"
+        self.assertTrue(_matches_ollama(process))
 
     @patch("systemone_bench.telemetry.psutil.cpu_freq")
     def test_cpu_frequency_summary_aggregates_per_cpu(
