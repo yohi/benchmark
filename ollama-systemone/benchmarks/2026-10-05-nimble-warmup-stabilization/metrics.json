@@ -1,0 +1,80 @@
+{
+  "trials": [
+    {
+      "trial": 1,
+      "repeat": 1,
+      "profile": "synthetic-1",
+      "first5_ms": 15801,
+      "first20_ratio": 1.047,
+      "median_ms": 15469.8,
+      "p95_ms": 20726.7,
+      "prefix_concentrated_tail": false
+    },
+    {
+      "trial": 2,
+      "repeat": 1,
+      "profile": "representative-7",
+      "first5_ms": 17687.5,
+      "first20_ratio": 1.063,
+      "median_ms": 15305.6,
+      "p95_ms": 26040.1,
+      "prefix_concentrated_tail": false
+    },
+    {
+      "trial": 3,
+      "repeat": 2,
+      "profile": "representative-7",
+      "first5_ms": 15396.3,
+      "first20_ratio": 1,
+      "median_ms": 15277.9,
+      "p95_ms": 15732.3,
+      "prefix_concentrated_tail": false
+    },
+    {
+      "trial": 4,
+      "repeat": 2,
+      "profile": "synthetic-1",
+      "first5_ms": 15285.2,
+      "first20_ratio": 1.007,
+      "median_ms": 14995.8,
+      "p95_ms": 15502.6,
+      "prefix_concentrated_tail": false
+    }
+  ],
+  "profile_aggregate": {
+    "synthetic-1": {
+      "first1_ms": 15998.8,
+      "first5_ms": 15543.1,
+      "first10_ms": 15387.8,
+      "first20_ms": 15759.5,
+      "after20_ms": 15339.7,
+      "median_ms": 15232.8,
+      "p95_ms": 18114.7
+    },
+    "representative-7": {
+      "first1_ms": 15587.2,
+      "first5_ms": 16541.9,
+      "first10_ms": 16587,
+      "first20_ms": 16274.8,
+      "after20_ms": 15758.5,
+      "median_ms": 15291.8,
+      "p95_ms": 20886.2
+    }
+  },
+  "representative_over_synthetic": {
+    "first1_ratio": 0.974,
+    "first5_ratio": 1.064,
+    "first10_ratio": 1.078,
+    "first20_ratio": 1.033,
+    "after20_ratio": 1.027,
+    "median_ratio": 1.004,
+    "p95_ratio": 1.153
+  },
+  "interpretation": {
+    "representative_first5_change_fraction": 0.064,
+    "representative_p95_change_fraction": 0.153,
+    "profile_improvement_supported": false,
+    "chronological_repeat_effect_observed": true,
+    "note": "both repeat-1 trials contain substantial spikes while both repeat-2 trials are near steady state, despite reversed profile order"
+  }
+}
