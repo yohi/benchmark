@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import os
+from pathlib import Path
 from typing import Any
 
 import psutil
@@ -90,15 +91,16 @@ def temperature_summary() -> dict[str, Any]:
 def _matches_ollama(process: psutil.Process) -> bool:
     try:
         name = (process.name() or "").lower()
-        exe = (process.exe() or "").lower()
-        cmdline = " ".join(process.cmdline()).lower()
+        exe_name = Path(process.exe() or "").name.lower()
+        cmdline = process.cmdline()
+        argv0 = Path(cmdline[0]).name.lower() if cmdline else ""
     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
         return False
 
-    return (
-        "ollama" in name
-        or "ollama" in exe
-        or "ollama" in cmdline
+    candidates = (name, exe_name, argv0)
+    return any(
+        candidate == "ollama" or candidate.startswith("ollama_")
+        for candidate in candidates
     )
 
 
