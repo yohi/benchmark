@@ -135,3 +135,50 @@ It only tests whether a stronger representative warmup changes the observed pref
 Do not modify the validated routing threshold from this experiment.
 
 Do not treat the reused 35-case workload as independent quality validation.
+
+
+## Stronger reset follow-up
+
+The first warmup study showed a chronological effect that dominated the warmup profile:
+
+```text
+repeat 1:
+  both profiles contained large latency spikes
+
+repeat 2:
+  both profiles were close to steady state
+```
+
+Because every trial used model unload, this suggests that unload does not reset all latency-relevant state.
+
+The CLI therefore supports a stronger reset boundary:
+
+```bash
+uv run systemone-warmup-study \
+  --model nimble \
+  --dataset datasets/latency-warmup-fixed-workload.jsonl \
+  --repeats 2 \
+  --reset-mode restart \
+  --restart-command "sudo -n systemctl restart ollama" \
+  --restart-wait 2
+```
+
+With `--reset-mode restart`, every trial:
+
+1. executes the configured restart command with `subprocess.run(..., check=True)`
+2. waits the configured delay
+3. probes `/api/tags` until Ollama is ready
+4. executes the selected warmup profile
+5. runs the same fixed 35-request measured workload
+
+The restart command is configurable because service management may differ by host.
+
+Use a non-interactive command. For systemd setups, `sudo -n systemctl restart ollama` is appropriate only when the current user already has non-interactive permission for that command.
+
+Do not combine this first restart experiment with page-cache dropping, CPU-governor changes, or other host-level resets. The purpose is to change exactly one reset boundary.
+
+### Interpretation
+
+If the earlier repeat-1 / repeat-2 chronological difference disappears under process restart, process-local Ollama/runtime state is implicated.
+
+If the chronological effect remains, move the next investigation to host-level state such as CPU frequency/governor, memory/page-cache residency, scheduler behavior, or thermal state.
