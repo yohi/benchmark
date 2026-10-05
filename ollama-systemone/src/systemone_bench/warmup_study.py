@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import statistics
+import subprocess
 import time
 from pathlib import Path
 from typing import Any
@@ -265,6 +267,71 @@ def unload_model(
     response.raise_for_status()
 
 
+def wait_for_ollama(
+    client: httpx.Client,
+    base_url: str,
+    timeout: float,
+) -> None:
+    deadline = time.monotonic() + timeout
+    last_error: Exception | None = None
+
+    while time.monotonic() < deadline:
+        try:
+            response = client.get(
+                f"{base_url.rstrip('/')}/api/tags",
+                timeout=min(5.0, timeout),
+            )
+            response.raise_for_status()
+            return
+        except (httpx.HTTPError, OSError) as exc:
+            last_error = exc
+            time.sleep(0.25)
+
+    raise RuntimeError(
+        f"Ollama did not become ready within {timeout}s"
+    ) from last_error
+
+
+def reset_runtime(
+    client: httpx.Client,
+    base_url: str,
+    model: str,
+    reset_mode: str,
+    restart_command: str,
+    restart_wait: float,
+    timeout: float,
+) -> dict[str, Any]:
+    if reset_mode == "unload":
+        unload_model(client, base_url, model)
+        return {
+            "mode": "unload",
+            "restart_command": None,
+            "restart_wait_seconds": None,
+        }
+
+    if reset_mode != "restart":
+        raise ValueError(f"unknown reset mode: {reset_mode}")
+
+    if not restart_command.strip():
+        raise ValueError("restart mode requires --restart-command")
+
+    command = shlex.split(restart_command)
+    if not command:
+        raise ValueError("restart command must not be empty")
+
+    subprocess.run(command, check=True)
+
+    if restart_wait > 0:
+        time.sleep(restart_wait)
+
+    wait_for_ollama(client, base_url, timeout)
+    return {
+        "mode": "restart",
+        "restart_command": restart_command,
+        "restart_wait_seconds": restart_wait,
+    }
+
+
 def execute_warmups(
     client: httpx.Client,
     base_url: str,
@@ -381,6 +448,29 @@ def main() -> None:
     ap.add_argument("--base-url", default="http://localhost:11434")
     ap.add_argument("--timeout", type=float, default=300)
     ap.add_argument("--keep-alive", default="10m")
+    ap.add_argument(
+        "--reset-mode",
+        choices=("unload", "restart"),
+        default="unload",
+        help=(
+            "trial reset boundary: unload only the model or restart the "
+            "Ollama process/service"
+        ),
+    )
+    ap.add_argument(
+        "--restart-command",
+        default="",
+        help=(
+            "command used with --reset-mode restart, e.g. "
+            "'sudo -n systemctl restart ollama'"
+        ),
+    )
+    ap.add_argument(
+        "--restart-wait",
+        type=float,
+        default=2.0,
+        help="seconds to wait after restart before probing Ollama readiness",
+    )
     ap.add_argument("--output", type=Path, default=Path("results"))
 
     args = ap.parse_args()
@@ -389,6 +479,9 @@ def main() -> None:
         schedule = build_profile_schedule(args.repeats)
     except ValueError as exc:
         ap.error(str(exc))
+
+    if args.reset_mode == "restart" and not args.restart_command.strip():
+        ap.error("--reset-mode restart requires --restart-command")
 
     rows = load_jsonl(args.dataset)
     if len(rows) <= 20:
@@ -413,10 +506,19 @@ def main() -> None:
         for trial_order, (repeat, profile) in enumerate(schedule, 1):
             print(
                 f"\n[{trial_order}/{len(schedule)}] "
-                f"repeat={repeat} profile={profile}: unloading model",
+                f"repeat={repeat} profile={profile}: "
+                f"reset={args.reset_mode}",
                 flush=True,
             )
-            unload_model(client, args.base_url, args.model)
+            reset_observation = reset_runtime(
+                client=client,
+                base_url=args.base_url,
+                model=args.model,
+                reset_mode=args.reset_mode,
+                restart_command=args.restart_command,
+                restart_wait=args.restart_wait,
+                timeout=args.timeout,
+            )
 
             payloads = warmup_payloads(
                 profile,
@@ -449,6 +551,7 @@ def main() -> None:
                     "repeat": repeat,
                     "profile": profile,
                     "trial_order": trial_order,
+                    "reset": reset_observation,
                     "warmups": warmups,
                     "summary": summary,
                 }
@@ -488,7 +591,22 @@ def main() -> None:
         "by_profile": by_profile,
         "comparison": comparison,
         "methodology": {
-            "reset": "model unload before every trial",
+            "reset": (
+                "model unload before every trial"
+                if args.reset_mode == "unload"
+                else "Ollama process/service restart before every trial"
+            ),
+            "reset_mode": args.reset_mode,
+            "restart_command": (
+                args.restart_command
+                if args.reset_mode == "restart"
+                else None
+            ),
+            "restart_wait_seconds": (
+                args.restart_wait
+                if args.reset_mode == "restart"
+                else None
+            ),
             "synthetic_profile": "one existing generic synthetic warmup request",
             "representative_profile": (
                 "seven distinct warmup requests using the same seven-class "
