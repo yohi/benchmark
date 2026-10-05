@@ -671,3 +671,6 @@ See `benchmarks/README.md` for the recording policy. The first promoted record i
 A single System One request may contain multiple questions. Latency statistics are therefore calculated per HTTP request, while accuracy and confidence statistics are calculated per decision/question.
 
 CPU percentage is intentionally recorded as lightweight observational metadata. For rigorous CPU energy/per-core profiling, use an external profiler alongside this harness.
+
+
+The first telemetry-enabled run showed implausibly low Ollama process CPU attribution. The collector now aggregates the Ollama daemon and **all descendant processes** so runner CPU/RSS is included even when a child executable uses a different name. Re-run telemetry after this correction before interpreting Ollama CPU/RSS metrics.
