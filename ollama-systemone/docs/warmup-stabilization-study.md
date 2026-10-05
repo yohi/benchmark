@@ -159,7 +159,7 @@ uv run systemone-warmup-study \
   --dataset datasets/latency-warmup-fixed-workload.jsonl \
   --repeats 2 \
   --reset-mode restart \
-  --restart-command "sudo -n systemctl restart ollama" \
+  --restart-command "sudo systemctl restart ollama" \
   --restart-wait 2
 ```
 
@@ -173,7 +173,7 @@ With `--reset-mode restart`, every trial:
 
 The restart command is configurable because service management may differ by host.
 
-Use a non-interactive command. For systemd setups, `sudo -n systemctl restart ollama` is appropriate only when the current user already has non-interactive permission for that command.
+Use a non-interactive command. For systemd setups, `sudo systemctl restart ollama` is appropriate only when the current user already has non-interactive permission for that command.
 
 Do not combine this first restart experiment with page-cache dropping, CPU-governor changes, or other host-level resets. The purpose is to change exactly one reset boundary.
 
