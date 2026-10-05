@@ -1,0 +1,109 @@
+{
+  "restart_trials": [
+    {
+      "trial": 1,
+      "repeat": 1,
+      "profile": "synthetic-1",
+      "first5_ms": 15736.9,
+      "first20_ratio": 0.974,
+      "median_ms": 15196.3,
+      "p95_ms": 16946,
+      "prefix_concentrated_tail": false
+    },
+    {
+      "trial": 2,
+      "repeat": 1,
+      "profile": "representative-7",
+      "first5_ms": 18416.5,
+      "first20_ratio": 1.039,
+      "median_ms": 15212.1,
+      "p95_ms": 17384.5,
+      "prefix_concentrated_tail": false
+    },
+    {
+      "trial": 3,
+      "repeat": 2,
+      "profile": "representative-7",
+      "first5_ms": 15300.6,
+      "first20_ratio": 0.983,
+      "median_ms": 15235.6,
+      "p95_ms": 15825.2,
+      "prefix_concentrated_tail": false
+    },
+    {
+      "trial": 4,
+      "repeat": 2,
+      "profile": "synthetic-1",
+      "first5_ms": 15383.8,
+      "first20_ratio": 1.017,
+      "median_ms": 15292,
+      "p95_ms": 16406.1,
+      "prefix_concentrated_tail": false
+    }
+  ],
+  "restart_profile_aggregate": {
+    "synthetic-1": {
+      "first1_ms": 15786.8,
+      "first5_ms": 15560.3,
+      "first10_ms": 15453.7,
+      "first20_ms": 15501.2,
+      "after20_ms": 15575.8,
+      "median_ms": 15244.2,
+      "p95_ms": 16676.1
+    },
+    "representative-7": {
+      "first1_ms": 22588.3,
+      "first5_ms": 16858.6,
+      "first10_ms": 16004.1,
+      "first20_ms": 15629.6,
+      "after20_ms": 15455.3,
+      "median_ms": 15223.8,
+      "p95_ms": 16604.8
+    }
+  },
+  "representative_over_synthetic": {
+    "first1_ratio": 1.431,
+    "first5_ratio": 1.083,
+    "first10_ratio": 1.036,
+    "first20_ratio": 1.008,
+    "after20_ratio": 0.992,
+    "median_ratio": 0.999,
+    "p95_ratio": 0.996
+  },
+  "chronological_effect_p95": {
+    "unload_reset": {
+      "synthetic": {
+        "repeat1_ms": 20726.7,
+        "repeat2_ms": 15502.6,
+        "repeat1_over_repeat2": 1.336982
+      },
+      "representative": {
+        "repeat1_ms": 26040.1,
+        "repeat2_ms": 15732.3,
+        "repeat1_over_repeat2": 1.6552
+      }
+    },
+    "restart_reset": {
+      "synthetic": {
+        "repeat1_ms": 16946,
+        "repeat2_ms": 16406.1,
+        "repeat1_over_repeat2": 1.032908
+      },
+      "representative": {
+        "repeat1_ms": 17384.5,
+        "repeat2_ms": 15825.2,
+        "repeat1_over_repeat2": 1.098533
+      }
+    },
+    "p95_gap_reduction_fraction": {
+      "synthetic": 0.896652,
+      "representative": 0.848726
+    }
+  },
+  "interpretation": {
+    "original_prefix_tail_reproduced_under_restart": false,
+    "profile_effect_material": false,
+    "process_local_state_implicated": true,
+    "residual_sparse_spikes_remain": true
+  }
+}
