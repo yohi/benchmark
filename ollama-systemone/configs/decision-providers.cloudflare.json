@@ -1,0 +1,15 @@
+{
+  "providers": [
+    {
+      "name": "cloudflare-clef-flash",
+      "url": "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/cloudflare/clef-flash",
+      "model": "clef-flash",
+      "headers": {
+        "Authorization": "Bearer ${CLOUDFLARE_API_TOKEN}"
+      },
+      "response_path": [
+        "result"
+      ]
+    }
+  ]
+}
