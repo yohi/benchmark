@@ -1,0 +1,115 @@
+{
+  "laya_multilingual": {
+    "requests": 350,
+    "raw_accuracy": 0.411429,
+    "latency_ms": {
+      "mean": 371.327,
+      "p50": 358.53,
+      "p90": 424.186,
+      "p95": 499.044,
+      "p99": 644.038
+    },
+    "requests_per_second": 2.693,
+    "mean_confidence": 0.370345,
+    "thresholds": {
+      "0.50": {
+        "coverage": 0.2,
+        "accepted_accuracy": 0.628571,
+        "n": 70
+      },
+      "0.60": {
+        "coverage": 0.131429,
+        "accepted_accuracy": 0.717391,
+        "n": 46
+      },
+      "0.70": {
+        "coverage": 0.085714,
+        "accepted_accuracy": 0.733333,
+        "n": 30
+      },
+      "0.80": {
+        "coverage": 0.045714,
+        "accepted_accuracy": 0.6875,
+        "n": 16
+      },
+      "0.90": {
+        "coverage": 0.034286,
+        "accepted_accuracy": 0.583333,
+        "n": 12
+      }
+    },
+    "by_expected_accuracy": {
+      "debug": 0.74,
+      "deterministic": 0.26,
+      "documentation": 0.46,
+      "implementation": 0.06,
+      "planning": 0.56,
+      "research": 0.8,
+      "review": 0
+    },
+    "decision": "reject"
+  },
+  "strands_decider_2b_v21": {
+    "requests": 350,
+    "raw_accuracy": 0.997143,
+    "raw_errors": 1,
+    "latency_ms": {
+      "mean": 3592.619,
+      "p50": 3508.03,
+      "p90": 3846.381,
+      "p95": 4273.48,
+      "p99": 4978.922
+    },
+    "requests_per_second": 0.278,
+    "mean_confidence": 0.818149,
+    "thresholds": {
+      "0.50": {
+        "coverage": 0.982857,
+        "accepted_accuracy": 1,
+        "accepted_errors": 0,
+        "n": 344,
+        "one_sided_95pct_zero_error_upper_risk": 0.00867071468963676
+      },
+      "0.60": {
+        "coverage": 0.945714,
+        "accepted_accuracy": 1,
+        "accepted_errors": 0,
+        "n": 331
+      },
+      "0.70": {
+        "coverage": 0.84,
+        "accepted_accuracy": 1,
+        "accepted_errors": 0,
+        "n": 294
+      },
+      "0.80": {
+        "coverage": 0.577143,
+        "accepted_accuracy": 1,
+        "accepted_errors": 0,
+        "n": 202
+      },
+      "0.90": {
+        "coverage": 0.365714,
+        "accepted_accuracy": 1,
+        "accepted_errors": 0,
+        "n": 128
+      }
+    },
+    "by_expected_accuracy": {
+      "debug": 0.98,
+      "deterministic": 1,
+      "documentation": 1,
+      "implementation": 1,
+      "planning": 1,
+      "research": 1,
+      "review": 1
+    },
+    "only_raw_error": "debug -> implementation",
+    "decision": "advance-to-fresh-validation"
+  },
+  "comparison_to_nimble": {
+    "strands_p50_speedup_vs_nimble_approx": 4.34,
+    "strands_mean_speedup_vs_nimble_approx": 4.24,
+    "note": "Nimble latency reference is from the prior validated steady-state evidence chain, not a simultaneous rerun."
+  }
+}

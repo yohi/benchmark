@@ -1,0 +1,24 @@
+{
+  "providers": [
+    {
+      "name": "nimble",
+      "url": "http://127.0.0.1:11434/v1/systemone",
+      "health_url": "http://127.0.0.1:11434/api/tags",
+      "model": "nimble",
+      "request_fields": {
+        "keep_alive": "10m"
+      }
+    },
+    {
+      "name": "laya-multilingual",
+      "url": "http://127.0.0.1:8001/v1/systemone",
+      "health_url": "http://127.0.0.1:8001/health",
+      "model": "multilingual"
+    },
+    {
+      "name": "strands-decider-2b-v21",
+      "url": "http://127.0.0.1:8002/v1/systemone",
+      "health_url": "http://127.0.0.1:8002/health"
+    }
+  ]
+}
