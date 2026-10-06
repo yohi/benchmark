@@ -90,6 +90,39 @@ ClefのSystem One Text RoutingではProjectorは不要。llama.cpp公式docsで�
 
 省略すると一部の現行llama.cpp Buildでは `mmproj-Clef-Flash-Q8_0.gguf` を自動取得しようとして、Q4_K_M Model Load前に失敗する。
 
+## Manual Download Fallback
+
+llama.cpp内蔵Hugging Face Downloaderが接続できない場合は、Hugging Face公式CLIでGGUFを先に取得し、Local Fileを直接serveする。
+
+Benchmark環境を汚さずCLIを実行:
+
+```bash
+mkdir -p ~/.cache/clef-flash-q4
+
+uvx --from huggingface_hub hf download \
+  ggml-org/Clef-Flash-GGUF \
+  Clef-Flash-Q4_K_M.gguf \
+  --local-dir ~/.cache/clef-flash-q4
+```
+
+Slow Networkの場合:
+
+```bash
+export HF_HUB_DOWNLOAD_TIMEOUT=60
+```
+
+Download後:
+
+```bash
+llama serve \
+  -m ~/.cache/clef-flash-q4/Clef-Flash-Q4_K_M.gguf \
+  --no-mmproj \
+  --host 127.0.0.1 \
+  --port 8080
+```
+
+これでllama.cpp内蔵Downloaderを完全に回避しつつ、Inference Runtime / Benchmark条件は同一に保てる。
+
 ## Smoke
 
 別Terminalでllama.cppを起動した状態で:
