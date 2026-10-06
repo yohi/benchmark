@@ -111,14 +111,20 @@ Slow Networkの場合:
 export HF_HUB_DOWNLOAD_TIMEOUT=60
 ```
 
-Download後:
+Download後。8080が既存Serviceで使用中の場合を避けるため、ここでは8081を使用する:
 
 ```bash
 llama serve \
   -m ~/.cache/clef-flash-q4/Clef-Flash-Q4_K_M.gguf \
   --no-mmproj \
   --host 127.0.0.1 \
-  --port 8080
+  --port 8081
+```
+
+Benchmark側へBase URLを指定:
+
+```bash
+export CLEF_LLAMA_BASE_URL='http://127.0.0.1:8081'
 ```
 
 これでllama.cpp内蔵Downloaderを完全に回避しつつ、Inference Runtime / Benchmark条件は同一に保てる。
