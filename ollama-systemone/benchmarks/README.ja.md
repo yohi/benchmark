@@ -43,5 +43,6 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 - `2026-10-05-nimble-warmup-stabilization/` — 同一Fixed WorkloadでSynthetic-1とRepresentative-7を比較。Representative-7の改善Evidenceはなく、両ProfileともRepeat 1はSpike、Repeat 2は安定し、Warmup ProfileよりChronological / Runtime State Effectが支配的と判断した記録
 - `2026-10-05-nimble-warmup-process-restart/` — 各Trial前にOllama Service Restartを行って同一Studyを再実行。Repeat 1/2のp95 GapがSynthetic約89.7%、Representative約84.9%縮小し、Process-local Runtime Stateの関与が強く示唆された記録。Sparse Outlierは残存
 - `2026-10-06-nimble-request-telemetry/` — Ollama Daemon + 全Descendantを集計するCorrected Process-tree Telemetry Study。140 Requestすべてで>=1.25×Median Spikeは0件、強いLatency Correlationもなく、Host Tuningへ進む根拠なしとしてCurrent Benchmark ObjectiveのLatency InvestigationをCloseした記録
+- `2026-10-06-multi-provider-development/` — 既使用350-case Routing SetでのLaya Multilingual / Strands Decider 2B v21 Development比較。LayaはRaw Accuracy 41.14%でReject、StrandsはRaw 99.714%、threshold 0.50でAccepted Error 0・Coverage 98.286%、p50 3.51sとなり、新Fresh Holdoutへ進めるCandidateとした記録
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
