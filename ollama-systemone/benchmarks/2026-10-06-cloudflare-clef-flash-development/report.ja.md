@@ -6,6 +6,15 @@
 
 既使用350-case Development SetでCloudflare-hosted Clef-FlashはRaw 350/350 = 100%を達成し、threshold 0.50のSingle-policy 1% Accepted-risk Development GateもPASSした。
 
+## Repository Validation
+
+```text
+Ran 84 tests in 0.085s
+OK
+```
+
+Hosted-provider Adapter、Environment Expansion、Response Envelope、Usage Aggregation、および既存Benchmark Testを含めて全PASS。
+
 ## Benchmark
 
 Run ID:
