@@ -346,6 +346,54 @@ See:
 - `datasets/engineering-routing-single-policy-risk-fresh.md`
 - `datasets/engineering-routing-single-policy-risk-fresh.ja.md`
 
+## Multi-provider System One comparison
+
+`systemone-provider-bench` compares different Jev/System One compatible HTTP runtimes without installing their provider SDKs into this benchmark environment.
+
+The included local config targets:
+
+```text
+nimble                    Ollama     127.0.0.1:11434
+laya-multilingual         Laya       127.0.0.1:8001
+strands-decider-2b-v21    Strands    127.0.0.1:8002
+```
+
+Run a smoke comparison:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.local.json \
+  --dataset datasets/smoke.jsonl \
+  --warmup 1
+```
+
+Run one provider at a time when latency is a decision metric:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.local.json \
+  --only laya-multilingual \
+  --dataset datasets/engineering-routing-single-policy-risk-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --thresholds 0.50,0.60,0.70,0.80,0.90
+```
+
+The 350-case dataset above has already been consumed by the Nimble validation chain. In a cross-provider search it is **development evidence**, not a fresh holdout.
+
+Provider details deliberately write the provider alias into the existing `model` field, so the same output can be passed directly to:
+
+- `systemone-selective`
+- `systemone-risk-control`
+- other offline analyzers that key by `model`
+
+Do not assume confidence values or thresholds are comparable between providers. Develop a candidate threshold separately for each provider, freeze the winning provider/policy, then validate it on a new fresh holdout.
+
+See:
+
+- `docs/multi-provider-decision-benchmark.md`
+- `docs/multi-provider-decision-benchmark.ja.md`
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
