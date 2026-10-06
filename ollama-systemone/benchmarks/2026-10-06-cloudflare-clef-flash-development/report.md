@@ -6,6 +6,15 @@
 
 Cloudflare-hosted Clef-Flash produced a perfect raw routing result on the already-consumed 350-case development set and passed the single-policy 1% accepted-risk development gate at threshold 0.50.
 
+## Repository validation
+
+```text
+Ran 84 tests in 0.085s
+OK
+```
+
+The hosted-provider adapter, environment expansion, response-envelope handling, usage aggregation, and all pre-existing benchmark tests pass.
+
 ## Benchmark
 
 Run ID:
