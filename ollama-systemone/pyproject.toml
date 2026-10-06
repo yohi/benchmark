@@ -14,6 +14,7 @@ systemone-risk-control = "systemone_bench.risk_control:main"
 systemone-latency-tail = "systemone_bench.latency_tail:main"
 systemone-warmup-study = "systemone_bench.warmup_study:main"
 systemone-spike-analysis = "systemone_bench.spike_analysis:main"
+systemone-provider-bench = "systemone_bench.provider_bench:main"
 
 [build-system]
 requires = ["hatchling"]
