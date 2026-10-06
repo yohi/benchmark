@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-06",
+  "experiment": "cloudflare-clef-flash-single-policy-risk-fresh",
+  "status": "pass",
+  "run_id": "20261006-155459",
+  "dataset": "datasets/engineering-routing-clef-flash-risk-fresh.jsonl",
+  "dataset_status": "untouched-fresh-validation",
+  "provider": "cloudflare-clef-flash",
+  "model": "clef-flash",
+  "endpoint_model": "@cf/cloudflare/clef-flash",
+  "frozen_policy": {
+    "threshold": 0.5,
+    "max_accepted_risk": 0.01,
+    "confidence_level": 0.95,
+    "candidate_count": 1,
+    "multiple_testing_correction": "none-single-predeclared-policy"
+  },
+  "tests": {
+    "passed": 88,
+    "failed": 0,
+    "elapsed_seconds": 0.194
+  },
+  "source_artifacts": {
+    "details": "results/20261006-155459-provider-details.jsonl",
+    "summary": "results/20261006-155459-provider-summary.json",
+    "risk_control": "results/20261006-155459-clef-flash-single-policy-risk.json"
+  },
+  "decision": "PASS: Clef-Flash threshold 0.50 is a validated hosted decision-layer candidate for the current benchmark distribution"
+}
