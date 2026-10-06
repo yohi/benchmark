@@ -1,0 +1,41 @@
+{
+  "requests": 3,
+  "decisions": 6,
+  "raw_accuracy": 0.833333,
+  "mean_confidence": 0.90981,
+  "latency_ms": {
+    "warmup": 3862.7,
+    "mean": 6094.798,
+    "p50": 6141.543,
+    "p90": 6199.899,
+    "p95": 6207.193,
+    "p99": 6213.029
+  },
+  "requests_per_second": 0.164,
+  "thresholds": {
+    "0.5": {
+      "coverage": 1,
+      "accuracy": 0.833333,
+      "n": 6
+    },
+    "0.8": {
+      "coverage": 0.833333,
+      "accuracy": 1,
+      "n": 5
+    },
+    "0.9": {
+      "coverage": 0.5,
+      "accuracy": 1,
+      "n": 3
+    }
+  },
+  "usage": {
+    "input_tokens": 740,
+    "output_tokens": 0
+  },
+  "confusion": {
+    "other": {
+      "technical": 1
+    }
+  }
+}
