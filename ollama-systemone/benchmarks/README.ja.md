@@ -50,3 +50,4 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 - `2026-10-06-cloudflare-clef-flash-single-policy-risk-fresh/` — 事前固定したHosted Clef-Flash threshold 0.50をUntouched 350-case Holdoutで検証。Raw 350/350、332/350 Accepted・0 Error、Coverage 94.86%、One-sided Exact 95% Upper Accepted-risk 0.90%で<=1% GateをPASS。Current Benchmark Distributionに対するValidated Hosted Decision-layer Candidateとする記録
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
+- `2026-10-06-clef-flash-llamacpp-q4-smoke/` — llama.cpp Clef-Flash Q4_K_MのLocal Smoke。動作は成功したがUntuned CPU p50は6.14s、Routingは5/6。Local Interactive Pathを止める前に24-thread Batchの明示Tuningを1回だけ確認する記録
