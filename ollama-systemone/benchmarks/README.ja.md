@@ -51,3 +51,12 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
 - `2026-10-06-clef-flash-llamacpp-q4-smoke/` — llama.cpp Clef-Flash Q4_K_MのLocal Smoke/Tuning Study。Untuned CPU p50は6.14s、`-t 24 -tb 24` 明示時は10.68sへ悪化。事前Stop Boundaryの3sをどちらも超えたためLocal Interactive Clef PathはSTOPし、350-case Full Developmentは意図的に実行しない。
+## 最終判断
+
+実験Chain全体の総括:
+
+- `../docs/systemone-decision-model-final-evaluation.ja.md`
+- `../docs/systemone-decision-model-final-evaluation.md`
+
+最終Status: Model Search Closed。Hosted Clef-Flash threshold 0.50をInteractive Decision Layerとして採用。
+
