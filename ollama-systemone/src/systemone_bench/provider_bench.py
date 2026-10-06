@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
+import re
 import statistics
 import sys
 import time
@@ -30,6 +32,45 @@ class Provider:
     health_url: str | None = None
     headers: dict[str, str] = field(default_factory=dict)
     request_fields: dict[str, Any] = field(default_factory=dict)
+    response_path: tuple[str, ...] = ()
+
+
+ENV_REFERENCE_RE = re.compile(
+    r"\$(?:\{(?P<braced>[A-Za-z_][A-Za-z0-9_]*)\}|"
+    r"(?P<plain>[A-Za-z_][A-Za-z0-9_]*))"
+)
+
+
+def expand_environment(value: str, *, provider_name: str, field_name: str) -> str:
+    missing = {
+        match.group("braced") or match.group("plain")
+        for match in ENV_REFERENCE_RE.finditer(value)
+        if os.environ.get(match.group("braced") or match.group("plain")) is None
+    }
+    if missing:
+        names = ", ".join(sorted(missing))
+        raise ValueError(
+            f"provider {provider_name!r} {field_name} references unset "
+            f"environment variable(s): {names}"
+        )
+    return os.path.expandvars(value)
+
+
+def response_payload(provider: Provider, body: Any) -> dict[str, Any]:
+    current = body
+    for key in provider.response_path:
+        if not isinstance(current, dict) or key not in current:
+            dotted = ".".join(provider.response_path)
+            raise ValueError(
+                f"provider {provider.name!r} response is missing "
+                f"configured response_path {dotted!r}"
+            )
+        current = current[key]
+    if not isinstance(current, dict):
+        raise ValueError(
+            f"provider {provider.name!r} response payload must be an object"
+        )
+    return current
 
 
 def load_providers(path: Path) -> list[Provider]:
@@ -69,12 +110,40 @@ def load_providers(path: Path) -> list[Provider]:
 
         headers = item.get("headers") or {}
         request_fields = item.get("request_fields") or {}
+        response_path_value = item.get("response_path") or []
         if not isinstance(headers, dict):
             raise ValueError(f"provider {name!r} headers must be an object")
         if not isinstance(request_fields, dict):
             raise ValueError(
                 f"provider {name!r} request_fields must be an object"
             )
+        if not isinstance(response_path_value, list) or not all(
+            isinstance(part, str) and part
+            for part in response_path_value
+        ):
+            raise ValueError(
+                f"provider {name!r} response_path must be an array of strings"
+            )
+
+        url = expand_environment(
+            url,
+            provider_name=name,
+            field_name="url",
+        )
+        if health_url is not None:
+            health_url = expand_environment(
+                health_url,
+                provider_name=name,
+                field_name="health_url",
+            )
+        expanded_headers = {
+            str(key): expand_environment(
+                str(value),
+                provider_name=name,
+                field_name=f"headers.{key}",
+            )
+            for key, value in headers.items()
+        }
 
         providers.append(
             Provider(
@@ -82,8 +151,9 @@ def load_providers(path: Path) -> list[Provider]:
                 url=url,
                 model=model,
                 health_url=health_url,
-                headers={str(k): str(v) for k, v in headers.items()},
+                headers=expanded_headers,
                 request_fields=dict(request_fields),
+                response_path=tuple(response_path_value),
             )
         )
     return providers
@@ -195,9 +265,21 @@ def summarize_provider(
     rows = [row for row in details if row["model"] == provider_name]
 
     request_latency: dict[tuple[str, int], float] = {}
+    request_usage: dict[tuple[str, int], dict[str, Any]] = {}
     for row in rows:
-        request_latency[(row["case_id"], row["pass"])] = row["latency_ms"]
+        request_key = (row["case_id"], row["pass"])
+        request_latency[request_key] = row["latency_ms"]
+        usage = row.get("usage")
+        if isinstance(usage, dict):
+            request_usage[request_key] = usage
     latencies = list(request_latency.values())
+
+    usage_totals: dict[str, float | int] = {}
+    for usage in request_usage.values():
+        for key, value in usage.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                continue
+            usage_totals[key] = usage_totals.get(key, 0) + value
 
     labeled = [row for row in rows if row["correct"] is not None]
     confidences = [
@@ -239,6 +321,10 @@ def summarize_provider(
         "thresholds": {},
         "by_expected": {},
         "confusion_matrix": {},
+        "usage": {
+            "requests_with_usage": len(request_usage),
+            "totals": usage_totals,
+        },
     }
 
     for threshold in thresholds:
@@ -417,8 +503,9 @@ def main() -> None:
                     memory_after = psutil.virtual_memory().used
                     response.raise_for_status()
                     body = response.json()
+                    payload_body = response_payload(provider, body)
 
-                    answers = body.get("answers")
+                    answers = payload_body.get("answers")
                     if not isinstance(answers, dict):
                         raise ValueError(
                             f"provider {provider.name!r} returned no answers object"
@@ -464,6 +551,7 @@ def main() -> None:
                                 / 1024
                                 / 1024,
                                 "answer": answer,
+                                "usage": payload_body.get("usage"),
                                 "metadata": row.get("metadata"),
                             }
                         )
