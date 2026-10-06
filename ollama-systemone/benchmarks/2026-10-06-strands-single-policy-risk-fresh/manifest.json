@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-06",
+  "experiment": "strands-single-policy-risk-fresh-validation",
+  "status": "failed",
+  "dataset": "datasets/engineering-routing-strands-risk-fresh.jsonl",
+  "dataset_cases": 350,
+  "provider": "strands-decider-2b-v21",
+  "checkpoint": "StrandsAgents/strands-decider-2B-hobson-v21",
+  "frozen_policy": {
+    "threshold": 0.5,
+    "max_accepted_risk": 0.01,
+    "confidence_level": 0.95,
+    "candidate_count": 1
+  },
+  "tests": {
+    "passed": 81,
+    "failed": 0,
+    "elapsed_seconds": 0.192
+  },
+  "run": {
+    "run_id": "20261006-145352",
+    "benchmark_summary": "results/20261006-145352-provider-summary.json",
+    "benchmark_details": "results/20261006-145352-provider-details.jsonl",
+    "risk_control": "results/20261006-145352-strands-single-policy-risk.json"
+  },
+  "decision": "FAIL: threshold 0.50 does not satisfy the <=1% accepted-risk gate on the fresh holdout; Nimble remains the validated local quality reference"
+}
