@@ -1,0 +1,71 @@
+{
+  "raw": {
+    "decisions": 350,
+    "correct": 350,
+    "errors": 0,
+    "accuracy": 1,
+    "mean_confidence": 0.788126
+  },
+  "latency_ms": {
+    "mean": 289.348,
+    "p50": 183.269,
+    "p90": 512.616,
+    "p95": 611.721,
+    "p99": 1514.512
+  },
+  "throughput": {
+    "requests_per_second": 3.456
+  },
+  "usage": {
+    "requests_with_usage": 350,
+    "input_tokens": 153187,
+    "output_tokens": 0
+  },
+  "threshold_0_50": {
+    "accepted": 332,
+    "escalated": 18,
+    "coverage": 0.948571,
+    "accepted_errors": 0,
+    "accepted_accuracy": 1,
+    "empirical_risk": 0,
+    "upper_risk_bound_95": 0.009,
+    "pass": true
+  },
+  "by_expected": {
+    "debug": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.835452
+    },
+    "deterministic": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.8063
+    },
+    "documentation": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.708446
+    },
+    "implementation": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.662652
+    },
+    "planning": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.936894
+    },
+    "research": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.739238
+    },
+    "review": {
+      "decisions": 50,
+      "accuracy": 1,
+      "mean_confidence": 0.827902
+    }
+  }
+}
