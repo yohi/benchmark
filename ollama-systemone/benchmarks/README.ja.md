@@ -45,5 +45,6 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 - `2026-10-06-nimble-request-telemetry/` — Ollama Daemon + 全Descendantを集計するCorrected Process-tree Telemetry Study。140 Requestすべてで>=1.25×Median Spikeは0件、強いLatency Correlationもなく、Host Tuningへ進む根拠なしとしてCurrent Benchmark ObjectiveのLatency InvestigationをCloseした記録
 - `2026-10-06-multi-provider-development/` — 既使用350-case Routing SetでのLaya Multilingual / Strands Decider 2B v21 Development比較。LayaはRaw Accuracy 41.14%でReject、StrandsはRaw 99.714%、threshold 0.50でAccepted Error 0・Coverage 98.286%、p50 3.51sとなり、新Fresh Holdoutへ進めるCandidateとした記録
 - `2026-10-06-strands-single-policy-risk-fresh/` — 事前固定したStrands 2B v21 threshold 0.50をUntouched 350-case Holdoutで検証。Fresh Coverage 92.857%、325 Accepted中2 Error、Canonical 95% Upper Risk Bound 1.92%となり<=1% GateはFAIL。NimbleをValidated Local Quality Referenceとして維持する記録
+- `2026-10-06-strands-threshold-development/` — FAIL後の既使用EvidenceでThreshold Sweepを実施。0.68はCoverage 85.43%を維持するが1 ErrorでSingle-policy Upper Risk約1.58%、最初のZero-error 0.73はCoverage 80%かつUpper Risk約1.064%。Strandsを打ち切り、次候補をHosted Clef-Flashへ移す記録
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
