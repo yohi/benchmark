@@ -394,6 +394,52 @@ See:
 - `docs/multi-provider-decision-benchmark.md`
 - `docs/multi-provider-decision-benchmark.ja.md`
 
+### Strands Decider 2B v21 fresh 1% risk validation
+
+After the multi-provider development comparison, the next policy is frozen before measurement:
+
+```text
+provider = strands-decider-2b-v21
+checkpoint = StrandsAgents/strands-decider-2B-hobson-v21
+threshold = 0.50
+maximum accepted risk = 1%
+confidence level = 95%
+candidate count = 1
+```
+
+The new `datasets/engineering-routing-strands-risk-fresh.jsonl` holdout contains 350 balanced cases across 25 scenario families that do not overlap the previous Nimble 350-case risk holdout.
+
+Run exactly the frozen policy:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.local.json \
+  --only strands-decider-2b-v21 \
+  --dataset datasets/engineering-routing-strands-risk-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --thresholds 0.50
+```
+
+Then apply the single-policy risk gate:
+
+```bash
+uv run systemone-risk-control \
+  --details results/<RUN_ID>-provider-details.jsonl \
+  --model strands-decider-2b-v21 \
+  --thresholds 0.50 \
+  --max-risk 0.01 \
+  --confidence-level 0.95 \
+  --output results/<RUN_ID>-strands-single-policy-risk.json
+```
+
+Do not change threshold 0.50 after seeing this holdout and continue to call it fresh validation evidence.
+
+See:
+
+- `datasets/engineering-routing-strands-risk-fresh.md`
+- `datasets/engineering-routing-strands-risk-fresh.ja.md`
+
 ## Cascade analysis
 
 `systemone-cascade` reuses existing benchmark detail JSONL files, so threshold/cascade experiments do not rerun Ollama.
