@@ -1,5 +1,17 @@
 # Clef-Flash Q4_K_M Local llama.cpp Benchmark
 
+## Final status
+
+**CLOSED / Interactive用途 STOP**
+
+実測ではUntuned Q4_K_Mがp50 6.14s、`-t 24 -tb 24` ではp50 10.68sへ悪化した。
+
+事前Stop Boundary `p50 > 3s` を満たしたため、350-case Full Developmentは意図的に実行せず調査終了。
+
+最終判断は:
+
+- `docs/systemone-decision-model-final-evaluation.ja.md`
+
 ## 目的
 
 公開済みのClef-Flash GGUF Q4_K_Mを、CPU上の高速Local Decision Model候補として評価する。

@@ -45,3 +45,12 @@ If a threshold is later changed using evidence from a validation record, do not 
 - `2026-10-06-clef-flash-llamacpp-q4-smoke/` — local llama.cpp Clef-Flash Q4_K_M smoke/tuning study. Untuned CPU p50 was 6.14s; explicit `-t 24 -tb 24` regressed p50 to 10.68s. Both exceed the predeclared 3s stop boundary, so the local interactive Clef path is stopped and the 350-case full development run is intentionally skipped.
 
 The first three entries were backfilled after the recording policy was introduced. Their raw `results/` artifacts remain local and gitignored; the committed manifests, metrics, and reports preserve the observed decision-relevant evidence.
+## Final decision
+
+The experiment chain is summarized in:
+
+- `../docs/systemone-decision-model-final-evaluation.md`
+- `../docs/systemone-decision-model-final-evaluation.ja.md`
+
+Final status: model search closed; hosted Clef-Flash threshold 0.50 selected for the interactive decision layer.
+

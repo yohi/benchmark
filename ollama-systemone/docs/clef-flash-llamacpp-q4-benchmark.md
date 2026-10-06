@@ -1,5 +1,17 @@
 # Clef-Flash Q4_K_M local llama.cpp benchmark
 
+## Final status
+
+**CLOSED / STOP for interactive routing**
+
+Observed untuned Q4_K_M p50 was 6.14s; `-t 24 -tb 24` regressed p50 to 10.68s.
+
+Both exceeded the predeclared `p50 > 3s` stop boundary, so the 350-case full development run was intentionally skipped.
+
+Final decision:
+
+- `docs/systemone-decision-model-final-evaluation.md`
+
 ## Purpose
 
 Evaluate the public quantized local Clef-Flash build as a lower-latency CPU alternative to the previously measured Ollama Clef-Flash Q8_0 path.
