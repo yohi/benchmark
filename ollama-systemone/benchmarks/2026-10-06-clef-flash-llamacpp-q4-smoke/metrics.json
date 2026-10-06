@@ -37,5 +37,34 @@
     "other": {
       "technical": 1
     }
-  }
+  },
+  "thread_tuning_check": {
+    "run_id": "20261006-162301",
+    "configuration": {
+      "threads": 24,
+      "threads_batch": 24
+    },
+    "requests": 3,
+    "decisions": 6,
+    "raw_accuracy": 0.833333,
+    "latency_ms": {
+      "warmup": 11580.1,
+      "mean": 10564.55,
+      "p50": 10682.949,
+      "p90": 10882.629,
+      "p95": 10907.589,
+      "p99": 10927.557
+    },
+    "requests_per_second": 0.095,
+    "usage": {
+      "input_tokens": 740,
+      "output_tokens": 0
+    },
+    "delta_vs_untuned": {
+      "p50_ratio": 1.7394568433372528,
+      "p50_change_ms": 4541.406000000001,
+      "result": "regression"
+    }
+  },
+  "decision": "STOP local interactive Clef-Flash Q4_K_M investigation; explicit 24-thread tuning regressed latency and remained >3s p50"
 }
