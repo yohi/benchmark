@@ -17,6 +17,37 @@ It is intentionally isolated under `ollama-systemone/` so the repository can hos
 
 The primary optimization target is **maximum free/local coverage subject to a quality constraint**, not maximum standalone local-model accuracy.
 
+## Final decision
+
+The model search is closed.
+
+```text
+ADOPT:
+  Cloudflare hosted Clef-Flash
+  threshold = 0.50
+
+KEEP AS LOCAL QUALITY REFERENCE:
+  Nimble .80
+
+STOP:
+  Strands Decider 2B v21
+  Laya Multilingual
+  local Clef-Flash Q4_K_M for interactive routing
+```
+
+Recommended production direction:
+
+```text
+deterministic / exact logic
+  → hosted Clef-Flash .50
+  → stronger fallback LLM on low confidence / provider failure / quota exhaustion
+```
+
+Final evaluation:
+
+- `docs/systemone-decision-model-final-evaluation.md`
+- `docs/systemone-decision-model-final-evaluation.ja.md`
+
 ## Requirements
 
 - Python 3.11+
