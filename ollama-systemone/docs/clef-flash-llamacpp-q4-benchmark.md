@@ -75,7 +75,15 @@ GET  /health
 POST /v1/systemone
 ```
 
-The committed provider config points at those endpoints:
+The committed provider config reads the base URL from:
+
+```bash
+export CLEF_LLAMA_BASE_URL='http://127.0.0.1:8081'
+```
+
+and appends `/health` and `/v1/systemone`.
+
+Config:
 
 ```text
 configs/decision-providers.llamacpp-clef-flash-q4.json
@@ -120,14 +128,20 @@ If the network is slow, increase the Hugging Face download timeout:
 export HF_HUB_DOWNLOAD_TIMEOUT=60
 ```
 
-Then start llama.cpp from the local file:
+Then start llama.cpp from the local file. Port 8081 is used here because port 8080 may already be occupied by another local service:
 
 ```bash
 llama serve \
   -m ~/.cache/clef-flash-q4/Clef-Flash-Q4_K_M.gguf \
   --no-mmproj \
   --host 127.0.0.1 \
-  --port 8080
+  --port 8081
+```
+
+Point the benchmark config at that server:
+
+```bash
+export CLEF_LLAMA_BASE_URL='http://127.0.0.1:8081'
 ```
 
 This bypasses llama.cpp's model downloader entirely while keeping the inference runtime and benchmark conditions unchanged.
