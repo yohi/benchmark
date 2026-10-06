@@ -394,6 +394,47 @@ See:
 - `docs/multi-provider-decision-benchmark.md`
 - `docs/multi-provider-decision-benchmark.ja.md`
 
+### Local Clef-Flash Q4_K_M via llama.cpp
+
+The public `ggml-org/Clef-Flash-GGUF` model provides a Q4_K_M build for local llama.cpp inference:
+
+```text
+Q4_K_M = 6.49 GB
+runtime = llama.cpp
+endpoint = /v1/systemone
+```
+
+Start the local server:
+
+```bash
+llama serve \
+  -hf ggml-org/Clef-Flash-GGUF:Q4_K_M \
+  --no-mmproj \
+  --host 127.0.0.1 \
+  --port 8080
+```
+
+Then benchmark it with the existing provider harness:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.llamacpp-clef-flash-q4.json \
+  --only clef-flash-llamacpp-q4-k-m \
+  --dataset datasets/engineering-routing-single-policy-risk-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --thresholds 0.50,0.60,0.70,0.80,0.90
+```
+
+This comparison uses already-consumed development evidence and must not be treated as a fresh validation.
+
+Do not assume the hosted Clef-Flash confidence threshold transfers unchanged across Q4 quantization.
+
+See:
+
+- `docs/clef-flash-llamacpp-q4-benchmark.md`
+- `docs/clef-flash-llamacpp-q4-benchmark.ja.md`
+
 ### Cloudflare Clef-Flash fresh 1% risk validation
 
 The Clef-Flash candidate is frozen before measurement:

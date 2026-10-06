@@ -1,0 +1,9 @@
+{
+  "providers": [
+    {
+      "name": "clef-flash-llamacpp-q4-k-m",
+      "url": "${CLEF_LLAMA_BASE_URL}/v1/systemone",
+      "health_url": "${CLEF_LLAMA_BASE_URL}/health"
+    }
+  ]
+}

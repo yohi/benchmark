@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-06",
+  "experiment": "clef-flash-llamacpp-q4-smoke",
+  "run_id": "20261006-161951",
+  "status": "smoke-complete",
+  "model_source": "ggml-org/Clef-Flash-GGUF",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "dataset": "datasets/smoke.jsonl",
+  "provider": "clef-flash-llamacpp-q4-k-m",
+  "evidence_status": "development-smoke-only",
+  "note": "Smoke evidence only; do not infer fresh validation or production suitability."
+}
