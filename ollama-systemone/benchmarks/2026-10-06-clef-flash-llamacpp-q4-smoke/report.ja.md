@@ -53,3 +53,57 @@ Decision Rule:
 - Serious Local Interactive Candidateにはp50 < 1sを目標とする
 
 このTuning CheckはPerformanceのみで、Model / Decision Policyは変更しない。
+
+
+## Thread Tuning Check
+
+```text
+-t 24
+-tb 24
+```
+
+で1回だけ明示Tuningを実施。
+
+Run:
+
+```text
+20261006-162301
+```
+
+Observed:
+
+```text
+raw accuracy = 5/6 = 83.33%
+warmup = 11580.1ms
+mean = 10564.6ms
+p50 = 10682.9ms
+p95 = 10907.6ms
+RPS = 0.095
+```
+
+Untunedとの比較:
+
+```text
+untuned p50 = 6141.5ms
+24-thread p50 = 10682.9ms
+regression = +4541.4ms
+ratio = 1.74x slower
+```
+
+Routing Output / Confidenceは変化なし。
+
+## Final Decision
+
+**Local Interactive Clef-Flash Q4_K_M InvestigationはSTOP。**
+
+理由:
+
+- Untuned p50 = 6.14s
+- 24-thread p50 = 10.68s
+- どちらも事前Stop Boundaryの3sを大幅超過
+- 明示Thread Tuningでさらに悪化
+- Hosted Clef-FlashはDevelopmentでp50約183msかつFresh 1% Accepted-risk Gate PASS済み
+
+したがってLocal 350-case Full Developmentを追加実行しない。
+
+Local Q4はMulti-second Latencyを許容できるResearch / Offline Fallback用途に限定して扱う。
