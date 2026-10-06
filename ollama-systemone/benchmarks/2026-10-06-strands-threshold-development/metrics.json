@@ -1,0 +1,32 @@
+{
+  "selected_by_tool": null,
+  "reason": "No threshold satisfies simultaneous Bonferroni-corrected risk bound.",
+  "key_thresholds": {
+    "0.68": {
+      "coverage": 0.8543,
+      "accepted": 299,
+      "errors": 1,
+      "empirical_risk": 0.0033,
+      "bonferroni_upper_risk_bound": 0.0305,
+      "single_policy_95pct_upper_risk_bound": 0.0157668,
+      "note": "Meets the 85% coverage cutoff but fails the 1% risk objective."
+    },
+    "0.73": {
+      "coverage": 0.8,
+      "accepted": 280,
+      "errors": 0,
+      "empirical_risk": 0,
+      "bonferroni_upper_risk_bound": 0.0244,
+      "single_policy_95pct_upper_risk_bound": 0.010642,
+      "note": "First zero-error threshold; fails both the 85% coverage cutoff and the 1% single-policy upper bound."
+    }
+  },
+  "development_gate_result": {
+    "coverage_at_least_0_85_and_single_policy_upper_risk_at_most_0_01": false
+  },
+  "interpretation": {
+    "bonferroni_zero_error_sample_requirement": 688,
+    "single_policy_zero_error_sample_requirement": 299,
+    "note": "The Bonferroni sweep is conservative, but the stop decision does not depend on Bonferroni alone."
+  }
+}
