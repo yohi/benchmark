@@ -1,0 +1,74 @@
+{
+  "latency": {
+    "requests": 140,
+    "median_ms": 15072,
+    "spike_multiplier": 1.25,
+    "spike_threshold_ms": 18840,
+    "spike_count": 0,
+    "spike_rate": 0,
+    "max_ms": 15807.8
+  },
+  "by_trial": {
+    "1": {
+      "requests": 35,
+      "median_ms": 15056.5,
+      "spike_count": 0,
+      "spike_rate": 0
+    },
+    "2": {
+      "requests": 35,
+      "median_ms": 15045,
+      "spike_count": 0,
+      "spike_rate": 0
+    },
+    "3": {
+      "requests": 35,
+      "median_ms": 15083.5,
+      "spike_count": 0,
+      "spike_rate": 0
+    },
+    "4": {
+      "requests": 35,
+      "median_ms": 15090.3,
+      "spike_count": 0,
+      "spike_rate": 0
+    }
+  },
+  "correlations": {
+    "cpu_freq_before_mhz": 0.0456156941637232,
+    "cpu_freq_after_mhz": -0.11393662681363922,
+    "load1_before": -0.03149036406154473,
+    "load1_after": -0.06469667868557774,
+    "temperature_before_c": -0.21692752313422178,
+    "temperature_after_c": -0.016002979845098082,
+    "ollama_rss_before_bytes": -0.05496965394448966,
+    "ollama_rss_after_bytes": -0.053740257684190794,
+    "system_available_before_bytes": 0.11479592465855265,
+    "ollama_cpu_percent_over_request": 0.06277111140170676,
+    "ollama_process_count_before": 0.023725154699395047,
+    "ollama_descendant_only_count_before": 0.023725154699395054
+  },
+  "non_spike_means": {
+    "cpu_freq_before_mhz": 2123.4547577380954,
+    "cpu_freq_after_mhz": 2176.6004404761907,
+    "load1_before": 8.467626953125,
+    "load1_after": 8.469475446428572,
+    "temperature_before_c": 55.59285714285714,
+    "temperature_after_c": 56.65,
+    "ollama_rss_before_bytes": 12977899315.2,
+    "ollama_rss_after_bytes": 13083368448,
+    "system_available_before_bytes": 17409827079.314285,
+    "ollama_cpu_percent_over_request": 398.73022874818594,
+    "ollama_process_count_before": 2.2071428571428573,
+    "ollama_descendant_only_count_before": 1.207142857142857
+  },
+  "interpretation": {
+    "stable_sparse_spikes_reproduced": false,
+    "low_cpu_frequency_hypothesis_supported": false,
+    "high_load_hypothesis_supported": false,
+    "thermal_hypothesis_supported": false,
+    "process_lifecycle_hypothesis_supported": false,
+    "host_tuning_justified": false,
+    "telemetry_collector_process_tree_validated": true
+  }
+}

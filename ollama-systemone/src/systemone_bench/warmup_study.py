@@ -23,6 +23,10 @@ from systemone_bench.latency_tail import (
     latency_summary,
     prefix_analysis,
 )
+from systemone_bench.telemetry import (
+    capture_request_telemetry,
+    derive_request_telemetry,
+)
 
 
 PROFILE_SYNTHETIC = "synthetic-1"
@@ -380,6 +384,7 @@ def execute_measured_workload(
     repeat: int,
     profile: str,
     trial_order: int,
+    request_telemetry: bool = False,
 ) -> list[dict[str, Any]]:
     observations = []
     for position, row in enumerate(rows, 1):
@@ -391,12 +396,22 @@ def execute_measured_workload(
         }
         cpu_before = psutil.cpu_percent(interval=None)
         memory_before = psutil.virtual_memory().used
+        telemetry_before = (
+            capture_request_telemetry()
+            if request_telemetry
+            else None
+        )
         started = time.perf_counter()
         response = client.post(
             f"{base_url.rstrip('/')}/v1/systemone",
             json=payload,
         )
         elapsed_ms = (time.perf_counter() - started) * 1000
+        telemetry_after = (
+            capture_request_telemetry()
+            if request_telemetry
+            else None
+        )
         cpu_after = psutil.cpu_percent(interval=None)
         memory_after = psutil.virtual_memory().used
         response.raise_for_status()
@@ -426,6 +441,16 @@ def execute_measured_workload(
                 "memory_delta_mb": (
                     memory_after - memory_before
                 ) / 1024 / 1024,
+                "request_telemetry": (
+                    derive_request_telemetry(
+                        telemetry_before,
+                        telemetry_after,
+                        elapsed_ms,
+                    )
+                    if telemetry_before is not None
+                    and telemetry_after is not None
+                    else None
+                ),
                 "metadata": row.get("metadata") or {},
             }
         )
@@ -468,7 +493,7 @@ def main() -> None:
         default="",
         help=(
             "command used with --reset-mode restart, e.g. "
-            "'sudo -n systemctl restart ollama'"
+            "'sudo systemctl restart ollama'"
         ),
     )
     ap.add_argument(
@@ -476,6 +501,14 @@ def main() -> None:
         type=float,
         default=2.0,
         help="seconds to wait after restart before probing Ollama readiness",
+    )
+    ap.add_argument(
+        "--request-telemetry",
+        action="store_true",
+        help=(
+            "capture lightweight host and Ollama process telemetry before "
+            "and after every measured request"
+        ),
     )
     ap.add_argument("--output", type=Path, default=Path("results"))
 
@@ -548,6 +581,7 @@ def main() -> None:
                 repeat,
                 profile,
                 trial_order,
+                request_telemetry=args.request_telemetry,
             )
             all_details.extend(measured)
             summary = summarize_trial(measured)
@@ -624,6 +658,21 @@ def main() -> None:
             ),
             "order_control": (
                 "profile order alternates by repeat to reduce temporal-order bias"
+            ),
+            "request_telemetry": args.request_telemetry,
+            "request_telemetry_fields": (
+                [
+                    "CPU frequency before/after",
+                    "system load before/after",
+                    "temperature sensors before/after when available",
+                    "Ollama process PID/create time/RSS/CPU time",
+                    "system available memory",
+                    "derived Ollama CPU percent over request",
+                    "derived Ollama RSS delta",
+                    "derived Ollama process identity change",
+                ]
+                if args.request_telemetry
+                else []
             ),
         },
     }
