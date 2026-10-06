@@ -99,6 +99,39 @@ Therefore the benchmark launch command explicitly disables projector auto-downlo
 
 If omitted, some current llama.cpp builds may attempt to fetch `mmproj-Clef-Flash-Q8_0.gguf` and fail before loading the Q4_K_M model.
 
+## Manual download fallback
+
+If llama.cpp's built-in Hugging Face downloader cannot establish a connection, download the GGUF separately with Hugging Face's official CLI and serve the local file.
+
+Install/run the CLI without modifying the benchmark environment:
+
+```bash
+mkdir -p ~/.cache/clef-flash-q4
+
+uvx --from huggingface_hub hf download \
+  ggml-org/Clef-Flash-GGUF \
+  Clef-Flash-Q4_K_M.gguf \
+  --local-dir ~/.cache/clef-flash-q4
+```
+
+If the network is slow, increase the Hugging Face download timeout:
+
+```bash
+export HF_HUB_DOWNLOAD_TIMEOUT=60
+```
+
+Then start llama.cpp from the local file:
+
+```bash
+llama serve \
+  -m ~/.cache/clef-flash-q4/Clef-Flash-Q4_K_M.gguf \
+  --no-mmproj \
+  --host 127.0.0.1 \
+  --port 8080
+```
+
+This bypasses llama.cpp's model downloader entirely while keeping the inference runtime and benchmark conditions unchanged.
+
 ## Smoke
 
 With llama.cpp running in another terminal:
