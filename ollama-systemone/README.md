@@ -394,6 +394,48 @@ See:
 - `docs/multi-provider-decision-benchmark.md`
 - `docs/multi-provider-decision-benchmark.ja.md`
 
+### Cloudflare Clef-Flash hosted benchmark
+
+After closing the local-model investigation, evaluate Cloudflare-hosted Clef-Flash as the free/cheap-cloud decision layer.
+
+The committed config keeps account credentials out of Git:
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID='...'
+export CLOUDFLARE_API_TOKEN='...'
+```
+
+Smoke:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.cloudflare.json \
+  --only cloudflare-clef-flash \
+  --dataset datasets/smoke.jsonl \
+  --warmup 1
+```
+
+Development comparison on the already-consumed 350-case routing set:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.cloudflare.json \
+  --only cloudflare-clef-flash \
+  --dataset datasets/engineering-routing-single-policy-risk-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --thresholds 0.50,0.60,0.70,0.80,0.90
+```
+
+The provider adapter supports environment expansion and Cloudflare's top-level REST `result` envelope. Returned numeric `usage` fields are aggregated per HTTP request for later token/Neuron/cost analysis.
+
+Do not reuse Nimble or Strands confidence thresholds. Clef-Flash must develop its own selective-risk policy before any fresh holdout.
+
+See:
+
+- `docs/cloudflare-clef-flash-benchmark.md`
+- `docs/cloudflare-clef-flash-benchmark.ja.md`
+
 ### Strands Decider 2B v21 fresh 1% risk validation
 
 After the multi-provider development comparison, the next policy is frozen before measurement:
