@@ -435,6 +435,24 @@ uv run systemone-risk-control \
 
 Do not change threshold 0.50 after seeing this holdout and continue to call it fresh validation evidence.
 
+The completed fresh run `20261006-145352` **failed** the predeclared 1% risk gate:
+
+```text
+accepted = 325 / 350
+coverage = 92.857%
+accepted errors = 2
+empirical accepted risk = 0.615%
+one-sided exact 95% upper risk bound = 1.92%
+required upper bound <= 1%
+result = FAIL
+```
+
+Strands remains much faster than Nimble, but threshold 0.50 is not a validated replacement policy. Nimble threshold 0.80 remains the validated local quality reference.
+
+Durable evidence:
+
+- `benchmarks/2026-10-06-strands-single-policy-risk-fresh/`
+
 See:
 
 - `datasets/engineering-routing-strands-risk-fresh.md`
