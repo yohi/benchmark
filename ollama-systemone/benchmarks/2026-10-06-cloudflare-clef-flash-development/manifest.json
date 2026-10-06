@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-06",
+  "experiment": "cloudflare-clef-flash-development",
+  "status": "advance-to-fresh-validation",
+  "dataset": "datasets/engineering-routing-single-policy-risk-fresh.jsonl",
+  "dataset_status": "development-only-consumed-evidence",
+  "run_id": "20261006-154141",
+  "provider": "cloudflare-clef-flash",
+  "model": "clef-flash",
+  "endpoint_model": "@cf/cloudflare/clef-flash",
+  "candidate_policy": {
+    "threshold": 0.5,
+    "max_accepted_risk": 0.01,
+    "confidence_level": 0.95,
+    "candidate_count": 1
+  },
+  "source_artifacts": {
+    "details": "results/20261006-154141-provider-details.jsonl",
+    "summary": "results/20261006-154141-provider-summary.json",
+    "selective": "results/20261006-154141-clef-flash-selective.json",
+    "risk_control": "results/20261006-154141-clef-flash-risk-development.json"
+  },
+  "decision": "FREEZE threshold 0.50 and advance Clef-Flash to a new untouched fresh holdout"
+}
