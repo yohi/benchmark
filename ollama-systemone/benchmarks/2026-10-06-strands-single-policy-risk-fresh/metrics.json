@@ -1,0 +1,66 @@
+{
+  "raw": {
+    "decisions": 350,
+    "correct": 346,
+    "errors": 4,
+    "accuracy": 0.988571
+  },
+  "latency_ms": {
+    "mean": 3642.047,
+    "p50": 3541.741,
+    "p90": 3827.33,
+    "p95": 4227.894,
+    "p99": 5212.714
+  },
+  "threshold_0_50": {
+    "accepted": 325,
+    "escalated": 25,
+    "coverage": 0.928571,
+    "accepted_correct": 323,
+    "accepted_errors": 2,
+    "accepted_accuracy": 0.993846,
+    "empirical_risk": 0.006153846153846154,
+    "one_sided_exact_95pct_upper_risk_bound": 0.0192,
+    "pass": false
+  },
+  "class_accuracy": {
+    "debug": 1,
+    "deterministic": 1,
+    "documentation": 1,
+    "implementation": 0.94,
+    "planning": 1,
+    "research": 0.98,
+    "review": 1
+  },
+  "raw_confusion": {
+    "implementation->planning": 3,
+    "research->planning": 1
+  },
+  "risk_control": {
+    "model": "strands-decider-2b-v21",
+    "decisions": 350,
+    "candidates": 1,
+    "max_risk": 0.01,
+    "confidence": 0.95,
+    "correction": "bonferroni",
+    "family_alpha": 0.05,
+    "pointwise_alpha": 0.05,
+    "zero_error_sample_requirement": 299,
+    "selected_threshold": null,
+    "reason": "No threshold satisfies the requested simultaneous risk bound and minimum coverage."
+  },
+  "comparison": {
+    "development": {
+      "threshold": 0.5,
+      "accepted": 344,
+      "coverage": 0.982857,
+      "accepted_errors": 0
+    },
+    "fresh": {
+      "threshold": 0.5,
+      "accepted": 325,
+      "coverage": 0.928571,
+      "accepted_errors": 2
+    }
+  }
+}
