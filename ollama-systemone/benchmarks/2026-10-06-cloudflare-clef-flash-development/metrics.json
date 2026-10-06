@@ -1,0 +1,42 @@
+{
+  "raw": {
+    "decisions": 350,
+    "correct": 350,
+    "errors": 0,
+    "accuracy": 1,
+    "mean_confidence": 0.815997
+  },
+  "latency_ms": {
+    "mean": 236.971,
+    "p50": 187.732,
+    "p90": 359.081,
+    "p95": 524.92,
+    "p99": 881.126
+  },
+  "throughput": {
+    "requests_per_second": 4.22
+  },
+  "usage": {
+    "requests_with_usage": 350,
+    "input_tokens": 151404,
+    "output_tokens": 0
+  },
+  "threshold_0_50": {
+    "accepted": 348,
+    "escalated": 2,
+    "coverage": 0.994286,
+    "accepted_errors": 0,
+    "accepted_accuracy": 1,
+    "upper_risk_bound_95": 0.0086,
+    "pass": true
+  },
+  "selective": {
+    "ece": 0.184,
+    "brier": 0.0426,
+    "aurc": 0,
+    "excess_aurc": 0,
+    "error_auroc": null,
+    "errors": 0,
+    "note": "No errors were observed, so error-ranking AUROC is undefined. Confidence appears underconfident in absolute calibration but does not affect raw accuracy."
+  }
+}
