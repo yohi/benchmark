@@ -21,5 +21,10 @@
     "selective": "results/20261006-154141-clef-flash-selective.json",
     "risk_control": "results/20261006-154141-clef-flash-risk-development.json"
   },
-  "decision": "FREEZE threshold 0.50 and advance Clef-Flash to a new untouched fresh holdout"
+  "decision": "FREEZE threshold 0.50 and advance Clef-Flash to a new untouched fresh holdout",
+  "tests": {
+    "passed": 84,
+    "failed": 0,
+    "elapsed_seconds": 0.085
+  }
 }
