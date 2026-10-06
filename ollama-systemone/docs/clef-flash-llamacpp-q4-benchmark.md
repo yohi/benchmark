@@ -53,6 +53,7 @@ curl -LsSf https://llama.app/install.sh | sh
 
 llama serve \
   -hf ggml-org/Clef-Flash-GGUF:Q4_K_M \
+  --no-mmproj \
   --host 127.0.0.1 \
   --port 8080
 ```
@@ -62,6 +63,7 @@ Equivalent prebuilt/source binary form:
 ```bash
 llama-server \
   -hf ggml-org/Clef-Flash-GGUF:Q4_K_M \
+  --no-mmproj \
   --host 127.0.0.1 \
   --port 8080
 ```
@@ -80,6 +82,22 @@ configs/decision-providers.llamacpp-clef-flash-q4.json
 ```
 
 No model identifier is sent in the request because the server is already bound to the selected checkpoint.
+
+### Why `--no-mmproj`
+
+When `-hf` is used, recent llama.cpp builds automatically try to download a multimodal projector when model/repository metadata suggests one is available.
+
+For Clef/System One text routing, the projector is not required. llama.cpp documents that image input is not supported for Clef in this endpoint path.
+
+The current `ggml-org/Clef-Flash-GGUF` repository contains the BF16, Q8_0, and Q4_K_M model GGUFs but no `mmproj-*.gguf` file.
+
+Therefore the benchmark launch command explicitly disables projector auto-download:
+
+```text
+--no-mmproj
+```
+
+If omitted, some current llama.cpp builds may attempt to fetch `mmproj-Clef-Flash-Q8_0.gguf` and fail before loading the Q4_K_M model.
 
 ## Smoke
 
