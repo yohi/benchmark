@@ -96,3 +96,43 @@ Do not change the 1% risk target.
 Do not call the threshold-development result validation evidence.
 
 Any revised Strands policy requires a new untouched holdout.
+
+
+## Completed result
+
+The development sweep is complete.
+
+Key boundary:
+
+```text
+threshold 0.68:
+  coverage 85.43%
+  accepted 299
+  errors 1
+  single-policy 95% upper risk ≈ 1.577%
+
+threshold 0.73:
+  first zero-error threshold
+  coverage 80.00%
+  accepted 280
+  single-policy 95% upper risk ≈ 1.064%
+```
+
+Therefore no observed threshold satisfies both:
+
+```text
+coverage >= 85%
+single-policy 95% upper risk <= 1%
+```
+
+Decision:
+
+```text
+STOP Strands
+Do not create another Strands fresh holdout
+Move to hosted Clef-Flash evaluation
+```
+
+Durable evidence:
+
+- `benchmarks/2026-10-06-strands-threshold-development/`
