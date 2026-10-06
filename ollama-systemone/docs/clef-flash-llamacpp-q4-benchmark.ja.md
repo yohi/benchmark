@@ -49,6 +49,7 @@ curl -LsSf https://llama.app/install.sh | sh
 
 llama serve \
   -hf ggml-org/Clef-Flash-GGUF:Q4_K_M \
+  --no-mmproj \
   --host 127.0.0.1 \
   --port 8080
 ```
@@ -58,6 +59,7 @@ Prebuilt / Source Binaryなら:
 ```bash
 llama-server \
   -hf ggml-org/Clef-Flash-GGUF:Q4_K_M \
+  --no-mmproj \
   --host 127.0.0.1 \
   --port 8080
 ```
@@ -69,6 +71,24 @@ configs/decision-providers.llamacpp-clef-flash-q4.json
 ```
 
 Server-bound CheckpointなのでRequest Bodyにはmodel fieldを送らない。
+
+### `--no-mmproj` が必要な理由
+
+`-hf` 使用時、現在のllama.cppはModel / Repository MetadataからMultimodal Projectorが存在すると判断するとmmprojを自動Downloadしようとする。
+
+ClefのSystem One Text RoutingではProjectorは不要。llama.cpp公式docsでもClefのImage Inputは未対応。
+
+現在の `ggml-org/Clef-Flash-GGUF` RepositoryにはBF16 / Q8_0 / Q4_K_M Model GGUFはあるが、`mmproj-*.gguf` は存在しない。
+
+したがってLaunch時に:
+
+```text
+--no-mmproj
+```
+
+を明示する。
+
+省略すると一部の現行llama.cpp Buildでは `mmproj-Clef-Flash-Q8_0.gguf` を自動取得しようとして、Q4_K_M Model Load前に失敗する。
 
 ## Smoke
 
