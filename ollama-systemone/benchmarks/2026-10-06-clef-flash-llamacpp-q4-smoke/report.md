@@ -53,3 +53,57 @@ Decision rule for this investigation:
 - sub-1-second p50 would be required for a serious local interactive candidate
 
 This tuning check is performance-only; it does not change the model or decision policy.
+
+
+## Thread tuning check
+
+A single explicit CPU tuning check was run with:
+
+```text
+-t 24
+-tb 24
+```
+
+Run:
+
+```text
+20261006-162301
+```
+
+Observed:
+
+```text
+raw accuracy = 5/6 = 83.33%
+warmup = 11580.1ms
+mean = 10564.6ms
+p50 = 10682.9ms
+p95 = 10907.6ms
+RPS = 0.095
+```
+
+Compared with the untuned smoke:
+
+```text
+untuned p50 = 6141.5ms
+24-thread p50 = 10682.9ms
+regression = +4541.4ms
+ratio = 1.74x slower
+```
+
+The routing outputs and confidence values were unchanged.
+
+## Final decision
+
+**STOP the local interactive Clef-Flash Q4_K_M investigation.**
+
+Reason:
+
+- untuned p50 = 6.14s
+- explicit 24-thread tuning p50 = 10.68s
+- both are well above the predeclared 3s stop boundary
+- the tuning check made performance materially worse
+- hosted Clef-Flash remains ~183ms p50 on development evidence and already passed the fresh 1% accepted-risk gate
+
+Do not spend ~350 additional requests on the full local development set. The expected operational conclusion will not change enough to justify the CPU time.
+
+The local Q4 model remains useful only as a research/offline fallback candidate where multi-second latency is acceptable.
