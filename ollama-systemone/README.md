@@ -394,6 +394,66 @@ See:
 - `docs/multi-provider-decision-benchmark.md`
 - `docs/multi-provider-decision-benchmark.ja.md`
 
+### Cloudflare Clef-Flash fresh 1% risk validation
+
+The Clef-Flash candidate is frozen before measurement:
+
+```text
+provider = cloudflare-clef-flash
+model = clef-flash
+endpoint model = @cf/cloudflare/clef-flash
+threshold = 0.50
+maximum accepted risk = 1%
+confidence level = 95%
+candidate count = 1
+```
+
+The new holdout is:
+
+```text
+datasets/engineering-routing-clef-flash-risk-fresh.jsonl
+```
+
+It contains 350 balanced cases across 25 new scenario families with:
+
+```text
+350 unique task texts
+0 exact task overlap with prior routing datasets
+0 scenario-family overlap with the Nimble 350-case holdout
+0 scenario-family overlap with the Strands 350-case holdout
+```
+
+Run exactly one frozen policy:
+
+```bash
+uv run systemone-provider-bench \
+  --providers configs/decision-providers.cloudflare.json \
+  --only cloudflare-clef-flash \
+  --dataset datasets/engineering-routing-clef-flash-risk-fresh.jsonl \
+  --warmup 1 \
+  --iterations 1 \
+  --thresholds 0.50
+```
+
+Then evaluate the single-policy risk gate:
+
+```bash
+uv run systemone-risk-control \
+  --details results/<RUN_ID>-provider-details.jsonl \
+  --model cloudflare-clef-flash \
+  --thresholds 0.50 \
+  --max-risk 0.01 \
+  --confidence-level 0.95 \
+  --output results/<RUN_ID>-clef-flash-single-policy-risk.json
+```
+
+Do not change threshold 0.50 after observing this holdout and continue to call it fresh validation evidence.
+
+See:
+
+- `datasets/engineering-routing-clef-flash-risk-fresh.md`
+- `datasets/engineering-routing-clef-flash-risk-fresh.ja.md`
+
 ### Cloudflare Clef-Flash hosted benchmark
 
 After closing the local-model investigation, evaluate Cloudflare-hosted Clef-Flash as the free/cheap-cloud decision layer.

@@ -47,5 +47,6 @@ Validation Record を見た後で Threshold や Routing Policy を変更した�
 - `2026-10-06-strands-single-policy-risk-fresh/` — 事前固定したStrands 2B v21 threshold 0.50をUntouched 350-case Holdoutで検証。Fresh Coverage 92.857%、325 Accepted中2 Error、Canonical 95% Upper Risk Bound 1.92%となり<=1% GateはFAIL。NimbleをValidated Local Quality Referenceとして維持する記録
 - `2026-10-06-strands-threshold-development/` — FAIL後の既使用EvidenceでThreshold Sweepを実施。0.68はCoverage 85.43%を維持するが1 ErrorでSingle-policy Upper Risk約1.58%、最初のZero-error 0.73はCoverage 80%かつUpper Risk約1.064%。Strandsを打ち切り、次候補をHosted Clef-Flashへ移す記録
 - `2026-10-06-cloudflare-clef-flash-development/` — 既使用350-case Routing SetでHosted Clef-FlashをDevelopment評価。Raw 350/350、p50 187.7ms、Candidate threshold 0.50で348/350 Accepted・0 Error・One-sided 95% Upper Risk 0.86%。新Untouched Fresh Holdoutへ進める記録
+- `2026-10-06-cloudflare-clef-flash-single-policy-risk-fresh/` — 事前固定したHosted Clef-Flash threshold 0.50をUntouched 350-case Holdoutで検証。Raw 350/350、332/350 Accepted・0 Error、Coverage 94.86%、One-sided Exact 95% Upper Accepted-risk 0.90%で<=1% GateをPASS。Current Benchmark Distributionに対するValidated Hosted Decision-layer Candidateとする記録
 
 最初の 3 件は Recording Policy 導入後に Backfill した記録である。元の `results/` Raw Artifact はローカルのまま Git 管理対象外だが、実際に観測された意思決定関連の Metrics、実行条件、解釈をこのディレクトリに保存している。
