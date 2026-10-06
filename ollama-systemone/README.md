@@ -409,6 +409,7 @@ Start the local server:
 ```bash
 llama serve \
   -hf ggml-org/Clef-Flash-GGUF:Q4_K_M \
+  --no-mmproj \
   --host 127.0.0.1 \
   --port 8080
 ```
