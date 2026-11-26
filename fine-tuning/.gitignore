@@ -1,0 +1,6 @@
+/data/
+/runs/
+/artifacts/
+/.venv/
+__pycache__/
+*.pyc

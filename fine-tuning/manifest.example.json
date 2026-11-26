@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "NOT_RUN",
+  "project": "nexus",
+  "source_commit": null,
+  "base_model": null,
+  "base_model_revision": null,
+  "dataset_sha256": {
+    "train": null,
+    "dev": null,
+    "test": null
+  },
+  "seed": 42,
+  "dependencies_lock_sha256": null,
+  "device": null,
+  "training_parameters": {},
+  "elapsed_seconds": null,
+  "compute_units": null,
+  "artifact_sha256": null,
+  "metrics": null,
+  "adoption": "NOT_APPROVED"
+}
